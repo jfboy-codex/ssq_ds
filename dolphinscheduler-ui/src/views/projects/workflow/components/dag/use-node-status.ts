@@ -67,7 +67,7 @@ export function useNodeStatus(options: Options) {
         if (sourceNode && targetNode) {
           const sourceTaskInstance = sourceNode.data.taskInstance
           const targetTaskInstance = targetNode.data.taskInstance
-          isKeyPath = sourceTaskInstance.keyFlag === 1 && targetTaskInstance.keyFlag === 1
+          isKeyPath = sourceTaskInstance.nextKeyTask === targetTaskInstance.taskCode
         }
         edge.setData({ keyFlag: isKeyPath ? 1 : 0 })
         // if (isKeyPath) {

@@ -24,4 +24,6 @@ public interface TaskCallBack {
     public void updateRemoteApplicationInfo(int taskInstanceId, ApplicationInfo applicationInfo);
 
     public void updateTaskInstanceInfo(int taskInstanceId);
+
+    public TaskExecutionContext getTaskExecutionContext();
 }

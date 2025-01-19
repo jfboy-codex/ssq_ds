@@ -40,7 +40,7 @@ public class TasksExecutionRunnable {
 
     private Table<Host, Integer, Long> hostUsableTimeTable; //w(host,threadId)
 
-    private Table<Long, Long, IntermediateData> tasksNeedTasksData; //任务t1需要任务t2的中间数据信息（包括数据量以及位置信息）
+    private Table<Long, Long, IntermediateData> tasksNeedTasksData; //任务t1需要任务t2的中间数据信息
 
     private Map<Long, HostThread> tasksHostThreadMap; // 任务放置位置
 

@@ -124,6 +124,7 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         }
 
         successorFlowAdjuster.adjustSuccessorFlow(taskExecutionRunnable);
+        // 处理给定任务的后续任务
         triggerTasks(workflowExecutionRunnable, workflowExecutionGraph.getSuccessors(taskExecutionRunnable));
     }
 
@@ -204,12 +205,17 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
                 keyPath = paths.get(u);
             }
         }
+
         // 更新关键路径上的节点标记
-        keyPath.forEach(taskCode -> {
-            TaskInstance taskInstance = taskInstanceMap.get(taskCode);
+        List<Long> taskList = new ArrayList<>(keyPath);
+        for(int i=0; i<taskList.size(); i++) {
+            TaskInstance taskInstance = taskInstanceMap.get(taskList.get(i));
             taskInstance.setKeyFlag(1);
+            if(i<taskList.size()-1) {
+                taskInstance.setNextKeyTask(taskList.get(i + 1));
+            }
             processService.updateTaskInstance(taskInstance);
-        });
+        }
         log.info("关键路径是 {}", keyPath);
         return complentionTime;
     }

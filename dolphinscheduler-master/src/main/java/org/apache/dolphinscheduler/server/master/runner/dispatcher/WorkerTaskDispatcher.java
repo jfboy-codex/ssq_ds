@@ -92,9 +92,9 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
 
     @Override
     protected Map<Long, Optional<Host>> getTaskInstancesDispatchHosts(List<ITaskExecutionRunnable> taskExecutionRunnableList) {
-
+        // 获取并设置算法需要的信息，如数据中心带宽，线程状态等等
         TasksExecutionRunnable tasksExecutionRunnable = setInformation(taskExecutionRunnableList);
-
+        // 获取任务组
         String workerGroup = tasksExecutionRunnable.getWorkerGroup();
 
         Map<Long, Optional<Host>> tasksDispatchHosts = new HashMap<>();
@@ -106,6 +106,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
                 tasksDispatchHosts.put(taskInstance.getTaskCode(), getTaskInstanceDispatchHost(taskExecutionRunnable));
             }
         } else {
+            // 使用多任务调度算法分发多个任务
             Map<Long, HostThread> tasksDispatchHostThread = workerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             for (Map.Entry<Long, HostThread> entry : tasksDispatchHostThread.entrySet()) {
                 tasksDispatchHosts.put(entry.getKey(), Optional.of(entry.getValue().getHost()));
@@ -146,9 +147,12 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             Map<Host, Integer> hostThreadNum = getHostThreadNum();
             List<HostThreadStatus> hostThreadStatusList = new ArrayList<>();
             for(HostThreadStatus hostThreadStatus : allHostThreadStatusList) {
-                int threadNum = hostThreadNum.get(Host.of(hostThreadStatus.getHost()));
-                if(hostThreadStatus.getThreadId()<threadNum) {
-                    hostThreadStatusList.add(hostThreadStatus);
+                int threadNum = 0;
+                if(hostThreadNum.get(Host.of(hostThreadStatus.getHost()))!=null) {
+                    threadNum = hostThreadNum.get(Host.of(hostThreadStatus.getHost()));
+                    if(hostThreadStatus.getThreadId()<threadNum) {
+                        hostThreadStatusList.add(hostThreadStatus);
+                    }
                 }
             }
             ITaskExecutionRunnable.setHostThreadStatusList(hostThreadStatusList);
@@ -220,10 +224,13 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         List<HostThreadStatus> hostThreadStatusList = new ArrayList<>();
         Table<Host, Integer, Long> hostUsableTimeTable = HashBasedTable.create();
         for(HostThreadStatus hostThreadStatus : allHostThreadStatusList) {
-            int threadNum = hostThreadNum.get(Host.of(hostThreadStatus.getHost()));
-            if(hostThreadStatus.getThreadId()<threadNum) {
-                hostThreadStatusList.add(hostThreadStatus);
-                hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(), hostThreadStatus.getUsableTimeStamp());
+            int threadNum = 0;
+            if(hostThreadNum.get(Host.of(hostThreadStatus.getHost()))!=null) {
+                threadNum = hostThreadNum.get(Host.of(hostThreadStatus.getHost()));
+                if(hostThreadStatus.getThreadId()<threadNum) {
+                    hostThreadStatusList.add(hostThreadStatus);
+                    hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(), hostThreadStatus.getUsableTimeStamp());
+                }
             }
         }
         tasksExecutionRunnable.setHostThreadNum(hostThreadNum);
@@ -264,7 +271,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             for (TaskInstance leftTaskInstance : leftTaskInstanceList) {
                 long leftTaskCode = leftTaskInstance.getTaskCode();
                 String host = leftTaskInstance.getDataHost();
-                long dataSize = leftTaskInstance.getVarPool().getBytes(StandardCharsets.UTF_8).length * 8L;
+                long dataSize = leftTaskInstance.getOutResult().getBytes(StandardCharsets.UTF_8).length * 8L;
                 IntermediateData data = new IntermediateData(leftTaskInstance, host, dataSize);
                 taskDataTable.put(taskInstance.getTaskCode(), leftTaskCode, data);
             }
@@ -305,14 +312,15 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
     }
 
     public long predictExeTime(@NonNull ITaskExecutionRunnable ITaskExecutionRunnable) {
+        TaskInstance taskInstance = ITaskExecutionRunnable.getTaskInstance();
         // 获取往期任务实例
-        List<TaskInstance> oldTaskInstanceList = processService.querySuccessTaskInstanceByTaskCode(ITaskExecutionRunnable.getTaskInstance().getTaskCode(), 10);
+        List<TaskInstance> oldTaskInstanceList = processService.querySuccessTaskInstanceByTaskCode(taskInstance.getTaskCode(), taskInstance.getTaskDefinitionVersion(),10);
 
         // 用于存储所有的执行时间值
         List<Long> durationList = new ArrayList<>();
         // 求每个任务实例的持续时间并添加到列表中
-        for (TaskInstance taskInstance : oldTaskInstanceList) {
-            Long duration = DateUtils.duration2MS(taskInstance.getDuration()); // 单位ms
+        for (TaskInstance task : oldTaskInstanceList) {
+            Long duration = DateUtils.duration2MS(task.getDuration()); // 单位ms
             durationList.add(duration);
         }
 
@@ -441,7 +449,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         for (TaskInstance taskInstance : leftTaskInstanceList) {
             Host host = Host.of(taskInstance.getHost());
             // 求出数据大小，单位比特
-            long dataSize = taskInstance.getVarPool().getBytes(StandardCharsets.UTF_8).length * 8L;
+            long dataSize = taskInstance.getOutResult().getBytes(StandardCharsets.UTF_8).length * 8L;
             if (hostDataMap.get(host)!=null) {
                 dataSize += hostDataMap.get(host);
             }

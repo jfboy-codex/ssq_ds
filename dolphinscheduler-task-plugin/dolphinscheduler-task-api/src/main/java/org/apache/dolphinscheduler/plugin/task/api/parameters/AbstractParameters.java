@@ -55,6 +55,8 @@ public abstract class AbstractParameters implements IParameters {
 
     public List<Property> varPool = new ArrayList<>();
 
+    public List<Property> outResult = new ArrayList<>();
+
     @Override
     public abstract boolean checkParameters();
 

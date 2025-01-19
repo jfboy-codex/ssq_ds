@@ -28,7 +28,7 @@ public class YSolverGurobi {
     @Getter
     long optimalTime; // 最优完成时间
 
-    Map<Long, HostThread> dataHostThreadBiMap = new HashMap<>(); // 存储数据放置位置的结果
+    Map<Long, HostThread> dataHostThreadMap = new HashMap<>(); // 存储数据放置位置的结果
 
 
     public YSolverGurobi(BiMap<Integer, Long> dataBiMap, BiMap<Integer, HostThread> hostThreadBiMap, Table<Long, HostThread, Long> timeTable) {
@@ -91,7 +91,7 @@ public class YSolverGurobi {
                     for (int j = 0; j < J; j++) {
                         int x = (int) xijVars.get(m * J + j).get(GRB.DoubleAttr.X);
                         if (x==1) {
-                            dataHostThreadBiMap.put(dataBiMap.get(m), hostThreadBiMap.get(j));
+                            dataHostThreadMap.put(dataBiMap.get(m), hostThreadBiMap.get(j));
                             break;
                         }
                     }
@@ -107,11 +107,11 @@ public class YSolverGurobi {
             env.dispose();
 
             // 返回结果
-            return dataHostThreadBiMap;
+            return dataHostThreadMap;
 
         } catch (GRBException e) {
             log.info("Error code: {} . {}",  e.getErrorCode(), e.getMessage());
-            return dataHostThreadBiMap;
+            return dataHostThreadMap;
         }
     }
 }

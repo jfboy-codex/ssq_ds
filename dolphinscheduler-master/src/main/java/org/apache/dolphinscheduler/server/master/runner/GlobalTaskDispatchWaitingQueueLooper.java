@@ -67,7 +67,7 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
     }
 
     @Override
-    public void run() {
+    public void run() { // 循环执行
         while (RUNNING_FLAG.get()) {
 
             long currentTime = System.currentTimeMillis();
@@ -75,12 +75,13 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
             // delay队列确保取出延迟时间过期的，take方法取不到会一直阻塞
             // ITaskExecutionRunnable taskExecutionRunnable = globalTaskDispatchWaitingQueue.takeTaskExecuteRunnable();
 
-            // poll方法取不到会返回null
+            // poll方法取不到会返回null，不会堵塞
             ITaskExecutionRunnable taskExecutionRunnable = globalTaskDispatchWaitingQueue.pollTaskExecuteRunnable();
             if(taskExecutionRunnable != null) {
                 String taskType = taskExecutionRunnable.getTaskInstance().getTaskType();
                 String dispatchType = taskExecutionRunnable.getWorkflowInstance().getDispatchType();
-                if (TaskTypeUtils.isLogicTask(taskType) || !isMultiDispatcher(dispatchType)) { // 如果为逻辑任务或不支持多任务调度则直接分发
+                // 如果为逻辑任务或不支持多任务调度则直接分发
+                if (TaskTypeUtils.isLogicTask(taskType) || !isMultiDispatcher(dispatchType)) {
                     doOneDispatch(taskExecutionRunnable);
                 } else {
                     taskDispatchAblePool.add(taskExecutionRunnable); // 加入可调度池
@@ -88,7 +89,7 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
                 }
             }
 
-            // 如果超出间隔时间就执行分发
+            // 如果超出间隔时间就对池内的任务进行分发
             if(currentTime - lastUpdateTime > intervalTime) {
                 if(!taskDispatchAblePool.isEmpty()) doMultiDispatch();
             }
@@ -97,6 +98,7 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
 
     void doMultiDispatch() {
         List<ITaskExecutionRunnable> taskExecutionRunnableList = new ArrayList<>();
+        Map<Long,ITaskExecutionRunnable> taskExecutionRunnableMap = new HashMap<>();
         while (!taskDispatchAblePool.isEmpty()) {
             ITaskExecutionRunnable taskExecutionRunnable = taskDispatchAblePool.poll(); // 取出
             final TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
@@ -104,17 +106,21 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
             if (status != TaskExecutionStatus.SUBMITTED_SUCCESS && status != TaskExecutionStatus.DELAY_EXECUTION) {
                 log.warn("The TaskInstance {} state is : {}, will not dispatch", taskInstance.getName(), status);
             } else {
-                taskExecutionRunnableList.add(taskExecutionRunnable); // 加入调度集合
+                long taskCode = taskExecutionRunnable.getTaskInstance().getTaskCode();
+                if(taskExecutionRunnableMap.get(taskCode)!=null) {
+                    System.out.println("旧: " + taskExecutionRunnableMap.get(taskCode));
+                    System.out.println("新: " + taskExecutionRunnable);
+                }
+                taskExecutionRunnableMap.put(taskCode, taskExecutionRunnable); // 加入map,防止出现重复的任务
             }
+        }
+        // map转为list
+        for(Map.Entry<Long, ITaskExecutionRunnable> entry : taskExecutionRunnableMap.entrySet()) {
+            taskExecutionRunnableList.add(entry.getValue());
         }
         try {
             final TaskDispatcher taskDispatcher = taskDispatchFactory.getWorkerTaskDispatcher();
             taskDispatcher.dispatchTasks(taskExecutionRunnableList);
-//            if(taskExecutionRunnableList.size()==1) {
-//                taskDispatcher.dispatchTask(taskExecutionRunnableList.get(0));
-//            } else {
-//                taskDispatcher.dispatchTasks(taskExecutionRunnableList);
-//            }
         } catch (Exception e) {
             for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
                 long waitingTimeMills = Math.max(taskExecutionRunnable.getTaskExecutionContext().increaseDispatchFailTimes() * 1_000L, 60_000L);

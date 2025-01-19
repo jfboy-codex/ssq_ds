@@ -33,7 +33,7 @@ public class XSolverGurobi {
     @Getter
     long optimalTime; // 最优完成时间
 
-    Map<Long, HostThread> taskHostThreadBiMap = new HashMap<>(); // 存储任务放置位置的结果
+    Map<Long, HostThread> taskHostThreadMap = new HashMap<>(); // 存储任务放置位置的结果
 
 
     public XSolverGurobi(BiMap<Integer, Long> taskBiMap, BiMap<Integer, HostThread> hostThreadBiMap, Table<Long, HostThread, Long> timeTable) {
@@ -45,6 +45,10 @@ public class XSolverGurobi {
     }
 
     public Map<Long, HostThread> solve() {
+        if(T>J) {
+            log.error("单次调度任务数大于数据中心可执行线程总数!!!");
+            return new HashMap<>();
+        }
         try {
             GRBEnv    env   = new GRBEnv();
             env.set(GRB.IntParam.OutputFlag, 0);
@@ -105,7 +109,7 @@ public class XSolverGurobi {
                     for (int j = 0; j < J; j++) {
                         int x = (int) xijVars.get(t * J + j).get(GRB.DoubleAttr.X);
                         if (x==1) {
-                            taskHostThreadBiMap.put(taskBiMap.get(t), hostThreadBiMap.get(j));
+                            taskHostThreadMap.put(taskBiMap.get(t), hostThreadBiMap.get(j));
                             break;
                         }
                     }
@@ -113,7 +117,7 @@ public class XSolverGurobi {
                 optimalTime = (long) model.get(GRB.DoubleAttr.ObjVal);
                 // log.info("目标函数最优值: {}", model.get(GRB.DoubleAttr.ObjVal));
             } else {
-                log.info("问题无解或未达到最优解...");
+                log.error("问题无解或未达到最优解...");
             }
 
             // 释放资源
@@ -121,11 +125,11 @@ public class XSolverGurobi {
             env.dispose();
 
             // 返回结果
-            return taskHostThreadBiMap;
+            return taskHostThreadMap;
 
         } catch (GRBException e) {
             log.info("Error code: {} . {}",  e.getErrorCode(), e.getMessage());
-            return taskHostThreadBiMap;
+            return taskHostThreadMap;
         }
     }
 }

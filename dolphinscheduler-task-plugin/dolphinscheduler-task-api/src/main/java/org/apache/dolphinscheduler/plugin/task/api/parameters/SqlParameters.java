@@ -218,7 +218,7 @@ public class SqlParameters extends AbstractParameters {
         return new ArrayList<>();
     }
 
-    public void dealOutParam(String result) {
+    public void dealOutParam(String result, int taskInstanceId) {
 
         // ssq 注释
         // if (CollectionUtils.isEmpty(localParams)) {
@@ -229,26 +229,27 @@ public class SqlParameters extends AbstractParameters {
 
         // ssq 添加自定义参数result
         Property outputProperty = new Property();
-        outputProperty.setProp("result");
+        String name = "task-" + taskInstanceId + "-result";
+        outputProperty.setProp(name);
         outputProperty.setDirect(Direct.OUT);
         outputProperty.setType(DataType.LIST);
         outputProperty.setValue(result);
         localParams.add(outputProperty);
 
         // ssq 添加所有字段参数
-        Set<String> myKeySet = sqlResult.get(0).keySet();
-        for (String key : myKeySet) {
-            Property keyProperty = new Property();
-            keyProperty.setProp("my." + key);
-            keyProperty.setDirect(Direct.OUT);
-            if (sqlResult.size() > 1) {
-                keyProperty.setType(DataType.LIST);
-            } else {
-                keyProperty.setType(DataType.VARCHAR);
-            }
-            // 不用设置值，下面源代码会自己设置
-            localParams.add(keyProperty);
-        }
+//        Set<String> myKeySet = sqlResult.get(0).keySet();
+//        for (String key : myKeySet) {
+//            Property keyProperty = new Property();
+//            keyProperty.setProp("my." + key);
+//            keyProperty.setDirect(Direct.OUT);
+//            if (sqlResult.size() > 1) {
+//                keyProperty.setType(DataType.LIST);
+//            } else {
+//                keyProperty.setType(DataType.VARCHAR);
+//            }
+//            // 不用设置值，下面源代码会自己设置
+//            localParams.add(keyProperty);
+//        }
 
 
         List<Property> outProperty = getOutProperty(localParams);
@@ -270,17 +271,17 @@ public class SqlParameters extends AbstractParameters {
             Set<String> keySet = sqlResult.get(0).keySet();
             for (String key : keySet) {
                 sqlResultFormat.put(key, new ArrayList<>());
-                sqlResultFormat.put("my."+key, new ArrayList<>()); // ssq
+                // sqlResultFormat.put("my."+key, new ArrayList<>()); // ssq
             }
             for (Map<String, String> info : sqlResult) {
                 for (String key : info.keySet()) {
                     sqlResultFormat.get(key).add(String.valueOf(info.get(key)));
-                    sqlResultFormat.get("my."+key).add(String.valueOf(info.get(key))); // ssq
+                    // sqlResultFormat.get("my."+key).add(String.valueOf(info.get(key))); // ssq
                 }
             }
             // localParams的值也随之改变
             for (Property info : outProperty) {
-                if (!Objects.equals(info.getProp(), "result")) { // ssq 加入一层判断，不改变自定义参数result的值
+                if (!info.getProp().endsWith("result")) { // ssq 加入一层判断，不改变自定义参数result的值
                     if (info.getType() == DataType.LIST) {
                         info.setValue(JSONUtils.toJsonString(sqlResultFormat.get(info.getProp())));
                     }
@@ -290,7 +291,7 @@ public class SqlParameters extends AbstractParameters {
             // result only one line
             Map<String, String> firstRow = sqlResult.get(0);
             for (Property info : outProperty) {
-                if (!Objects.equals(info.getProp(), "result")) { // ssq 加入一层判断，不改变自定义参数result的值
+                if (!info.getProp().endsWith("result")) { // ssq 加入一层判断，不改变自定义参数result的值
                     if (!info.getProp().startsWith("my.")) { // ssq 不包含my.
                         info.setValue(String.valueOf(firstRow.get(info.getProp())));
                     } else {
@@ -300,6 +301,7 @@ public class SqlParameters extends AbstractParameters {
             }
         }
         varPool = VarPoolUtils.mergeVarPool(Lists.newArrayList(varPool, outProperty));
+        outResult = outProperty;
 
     }
 

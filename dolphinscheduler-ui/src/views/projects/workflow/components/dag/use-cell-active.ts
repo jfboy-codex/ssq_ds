@@ -55,12 +55,12 @@ export function useCellActive(options: Options) {
   }
 
   function setEdgeStyle(edge: Edge) {
-    
+    console.log('edge', edge)
     const isHover = edge === hoverCell.value
     const isSelected = graph.value?.isSelected(edge)
 
     // 关键路径(两个节点都是关键节点)
-    const isKeyPath = edge.data.keyFlag === 1
+    // const isKeyPath = edge.data.keyFlag === 1
 
     // TODO
     // const labelName = this.getEdgeLabelName ? this.getEdgeLabelName(edge) : ''
@@ -96,7 +96,7 @@ export function useCellActive(options: Options) {
   function setNodeStyle(node: Node) {
     const isHover = node === hoverCell.value
     const isSelected = graph.value?.isSelected(node)
-    const isKeyTask = node.data.taskInstance.keyFlag === 1 // ssq
+    // const isKeyTask = node.data.taskInstance.keyFlag === 1 // ssq
     const portHover = _.cloneDeep(PORT_HOVER.groups[X6_PORT_OUT_NAME].attrs)
     const portSelected = _.cloneDeep(
       PORT_SELECTED.groups[X6_PORT_OUT_NAME].attrs

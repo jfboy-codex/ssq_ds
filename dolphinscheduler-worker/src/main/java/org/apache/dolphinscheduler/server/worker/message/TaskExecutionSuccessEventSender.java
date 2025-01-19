@@ -49,6 +49,7 @@ public class TaskExecutionSuccessEventSender
                 .taskInstanceHost(taskExecutionContext.getHost())
                 .endTime(taskExecutionContext.getEndTime())
                 .varPool(taskExecutionContext.getVarPool())
+                .outResult(taskExecutionContext.getOutResult()) // ssq
                 .build();
     }
 

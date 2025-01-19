@@ -213,8 +213,8 @@ public class ProcessServiceImpl implements ProcessService {
      * @return
      */
     @Override
-    public List<TaskInstance> querySuccessTaskInstanceByTaskCode(Long taskCode, int num) {
-        return taskInstanceMapper.querySuccessByTaskCode(taskCode, num);
+    public List<TaskInstance> querySuccessTaskInstanceByTaskCode(Long taskCode, int taskDefinitionVersion, int num) {
+        return taskInstanceMapper.querySuccessByTaskCode(taskCode, taskDefinitionVersion, num);
     }
 
     /**

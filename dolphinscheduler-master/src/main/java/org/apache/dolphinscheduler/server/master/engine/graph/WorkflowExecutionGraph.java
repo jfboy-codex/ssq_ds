@@ -164,10 +164,13 @@ public class WorkflowExecutionGraph implements IWorkflowExecutionGraph {
     public boolean isTriggerConditionMet(final ITaskExecutionRunnable taskExecutionRunnable) {
         return getPredecessors(taskExecutionRunnable.getName())
                 .stream()
-                .allMatch(predecessor -> isTaskFinish(predecessor)
-                        && !isTaskFailure(predecessor)
-                        && !isTaskPaused(predecessor)
-                        && !isTaskKilled(predecessor));
+                .allMatch(predecessor -> { //检查每个前驱任务是否都满足特定条件
+                    return isTaskFinish(predecessor)
+                            && predecessor.getTaskInstance()!=null //ssq
+                            && !isTaskFailure(predecessor)
+                            && !isTaskPaused(predecessor)
+                            && !isTaskKilled(predecessor);
+                });
     }
 
     @Override

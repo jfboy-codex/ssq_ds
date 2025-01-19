@@ -160,6 +160,10 @@ public class TaskInstance implements Serializable {
 
     private int keyFlag;
 
+    private Long nextKeyTask;
+
+    private String outResult;
+
     public void init(String host, Date startTime, String executePath) {
         this.host = host;
         this.startTime = startTime;

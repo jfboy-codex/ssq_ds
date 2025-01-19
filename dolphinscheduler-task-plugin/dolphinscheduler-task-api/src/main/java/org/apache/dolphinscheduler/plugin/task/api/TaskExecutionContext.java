@@ -129,6 +129,8 @@ public class TaskExecutionContext implements Serializable {
 
     private String varPool;
 
+    private String outResult;
+
     private int dryRun;
 
     private Map<String, Property> paramsMap;

@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.server.worker.runner;
 
+import lombok.Data;
 import org.apache.dolphinscheduler.extract.master.transportor.ITaskExecutionEvent;
 import org.apache.dolphinscheduler.plugin.task.api.TaskCallBack;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Builder
+@Data
 public class TaskCallbackImpl implements TaskCallBack {
 
     private final WorkerMessageSender workerMessageSender;

@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.plugin.task.sql;
 
+import com.obs.services.model.TaskCallback;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.datasource.api.plugin.DataSourceClientProvider;
@@ -149,7 +150,7 @@ public class SqlTask extends AbstractTask {
                     .collect(Collectors.toList());
 
             // execute sql task
-            executeFuncAndSql(mainStatementSqlBinds, preStatementSqlBinds, postStatementSqlBinds);
+            executeFuncAndSql(mainStatementSqlBinds, preStatementSqlBinds, postStatementSqlBinds, taskCallBack);
 
             setExitStatusCode(TaskConstants.EXIT_CODE_SUCCESS);
 
@@ -174,7 +175,8 @@ public class SqlTask extends AbstractTask {
      */
     public void executeFuncAndSql(List<SqlBinds> mainStatementsBinds,
                                   List<SqlBinds> preStatementsBinds,
-                                  List<SqlBinds> postStatementsBinds) throws Exception {
+                                  List<SqlBinds> postStatementsBinds,
+                                  TaskCallBack taskCallBack) throws Exception {
         try (
                 Connection connection =
                         DataSourceClientProvider.getAdHocConnection(DbType.valueOf(sqlParameters.getType()),
@@ -194,8 +196,11 @@ public class SqlTask extends AbstractTask {
                 String updateResult = executeUpdate(connection, mainStatementsBinds, "main");
                 result = setNonQuerySqlReturn(updateResult, sqlParameters.getLocalParams());
             }
+            // ssq
+            int taskInstanceId = taskCallBack.getTaskExecutionContext().getTaskInstanceId();
+
             // deal out params
-            sqlParameters.dealOutParam(result);
+            sqlParameters.dealOutParam(result, taskInstanceId);
 
             // post execute
             executeUpdate(connection, postStatementsBinds, "post");

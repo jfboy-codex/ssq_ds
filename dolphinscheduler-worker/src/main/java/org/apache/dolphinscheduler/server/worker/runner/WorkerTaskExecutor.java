@@ -76,6 +76,7 @@ public abstract class WorkerTaskExecutor implements Runnable {
     protected static final Logger log = LoggerFactory.getLogger(WorkerTaskExecutor.class);
 
     protected final TaskExecutionContext taskExecutionContext;
+
     protected final WorkerConfig workerConfig;
     protected final WorkerMessageSender workerMessageSender;
     protected final @Nullable StorageOperator storageOperator;
@@ -283,6 +284,7 @@ public abstract class WorkerTaskExecutor implements Runnable {
         taskExecutionContext.setProcessId(task.getProcessId());
         taskExecutionContext.setAppIds(task.getAppIds());
         taskExecutionContext.setVarPool(JSONUtils.toJsonString(task.getParameters().getVarPool()));
+        taskExecutionContext.setOutResult(JSONUtils.toJsonString(task.getParameters().getOutResult()));
         taskExecutionContext.setEndTime(System.currentTimeMillis());
 
         // upload out files and modify the "OUT FILE" property in VarPool

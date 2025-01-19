@@ -34,7 +34,7 @@ public interface ProcessService {
 
     List<TaskInstance> findTaskInstanceByWorkflowInstanceId(int workflowInstanceId);
 
-    List<TaskInstance> querySuccessTaskInstanceByTaskCode(Long taskCode, int num);
+    List<TaskInstance> querySuccessTaskInstanceByTaskCode(Long taskCode, int taskDefinitionVersion, int num);
 
     WorkflowInstance constructWorkflowInstance(Command command,
                                                String host) throws CronParseException, CodeGenerateUtils.CodeGenerateException;

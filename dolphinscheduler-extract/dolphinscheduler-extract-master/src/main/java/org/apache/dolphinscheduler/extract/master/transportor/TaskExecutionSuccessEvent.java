@@ -44,6 +44,8 @@ public class TaskExecutionSuccessEvent implements ITaskExecutionEvent {
 
     private String varPool;
 
+    private String outResult;
+
     private long eventCreateTime;
 
     private long eventSendTime;

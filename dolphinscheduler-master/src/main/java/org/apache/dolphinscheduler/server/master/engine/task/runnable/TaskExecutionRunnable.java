@@ -113,7 +113,7 @@ public class TaskExecutionRunnable implements ITaskExecutionRunnable {
                 .withWorkflowInstance(workflowInstance)
                 .build();
         taskInstance.setKeyFlag(0);
-        log.info("数据库插入任务实例 {} 成功！", taskInstance);
+        log.info("数据库插入任务实例 {} 成功！", taskInstance.getName());
         initializeTaskExecutionContext();
     }
 

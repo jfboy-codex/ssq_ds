@@ -39,6 +39,8 @@ public class TaskSuccessLifecycleEvent extends AbstractTaskLifecycleEvent {
 
     private final String varPool;
 
+    private final String outResult;
+
     @Override
     public ILifecycleEventType getEventType() {
         return TaskLifecycleEventType.SUCCEEDED;

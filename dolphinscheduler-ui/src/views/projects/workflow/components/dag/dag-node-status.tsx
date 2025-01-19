@@ -130,7 +130,7 @@ export default defineComponent({
               {/* <li>
                 {this.$props.t('project.workflow.retry_count')}:{' '}
                 {this.taskInstance.retryTimes}
-              </li>
+              </li> */}
               <li>
                 {this.$props.t('project.workflow.submit_time')}:{' '}
                 {this.taskInstance.submitTime}
@@ -142,7 +142,7 @@ export default defineComponent({
               <li>
                 {this.$props.t('project.workflow.end_time')}:{' '}
                 {this.taskInstance.endTime ? this.taskInstance.endTime : '-'}
-              </li> */}
+              </li>
             </ul>
           )
         }}

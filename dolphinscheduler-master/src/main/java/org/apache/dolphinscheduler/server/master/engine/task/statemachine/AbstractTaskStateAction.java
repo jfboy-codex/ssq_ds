@@ -224,6 +224,7 @@ public abstract class AbstractTaskStateAction implements ITaskStateAction {
         }
         log.info("间隔时间戳 {}", taskInstance.getEndTime().getTime() - taskInstance.getStartTime().getTime());
         taskInstance.setVarPool(taskSuccessEvent.getVarPool());
+        taskInstance.setOutResult(taskSuccessEvent.getOutResult());
         taskInstanceDao.updateById(taskInstance);
         log.info("数据库更新任务实例结束时间、运行时间、 参数池成功！");
     }

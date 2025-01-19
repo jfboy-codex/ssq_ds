@@ -115,6 +115,7 @@ public class TaskExecutionEventListenerImpl implements ITaskExecutionEventListen
                 .taskExecutionRunnable(taskExecutionRunnable)
                 .endTime(new Date(taskExecutionSuccessEvent.getEndTime()))
                 .varPool(taskExecutionSuccessEvent.getVarPool())
+                .outResult(taskExecutionSuccessEvent.getOutResult()) // ssq
                 .build();
         taskExecutionRunnable.getWorkflowEventBus().publish(taskSuccessEvent);
         // Once the master receive the event, then will send ack to the worker
