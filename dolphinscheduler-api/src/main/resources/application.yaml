@@ -48,7 +48,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/dolphinscheduler
     username: root
-    password: '020325'
+    password: '011026'
     hikari:
       connection-test-query: select 1
       pool-name: DolphinScheduler
@@ -243,7 +243,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/dolphinscheduler
     username: root
-    password: '020325'
+    password: '011026'
   quartz:
     properties:
       org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
