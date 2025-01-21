@@ -31,7 +31,11 @@ import org.apache.dolphinscheduler.plugin.task.api.utils.VarPoolUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
 
@@ -222,7 +226,7 @@ public class SqlParameters extends AbstractParameters {
 
         // ssq 注释
         // if (CollectionUtils.isEmpty(localParams)) {
-            // return;
+        // return;
         // }
 
         List<Map<String, String>> sqlResult = getListMapByString(result);
@@ -237,20 +241,19 @@ public class SqlParameters extends AbstractParameters {
         localParams.add(outputProperty);
 
         // ssq 添加所有字段参数
-//        Set<String> myKeySet = sqlResult.get(0).keySet();
-//        for (String key : myKeySet) {
-//            Property keyProperty = new Property();
-//            keyProperty.setProp("my." + key);
-//            keyProperty.setDirect(Direct.OUT);
-//            if (sqlResult.size() > 1) {
-//                keyProperty.setType(DataType.LIST);
-//            } else {
-//                keyProperty.setType(DataType.VARCHAR);
-//            }
-//            // 不用设置值，下面源代码会自己设置
-//            localParams.add(keyProperty);
-//        }
-
+        // Set<String> myKeySet = sqlResult.get(0).keySet();
+        // for (String key : myKeySet) {
+        // Property keyProperty = new Property();
+        // keyProperty.setProp("my." + key);
+        // keyProperty.setDirect(Direct.OUT);
+        // if (sqlResult.size() > 1) {
+        // keyProperty.setType(DataType.LIST);
+        // } else {
+        // keyProperty.setType(DataType.VARCHAR);
+        // }
+        // // 不用设置值，下面源代码会自己设置
+        // localParams.add(keyProperty);
+        // }
 
         List<Property> outProperty = getOutProperty(localParams);
         if (CollectionUtils.isEmpty(outProperty)) {

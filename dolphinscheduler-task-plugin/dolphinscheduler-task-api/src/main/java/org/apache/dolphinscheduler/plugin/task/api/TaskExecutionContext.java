@@ -32,8 +32,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.beans.BeanUtils;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * to master/worker task transport

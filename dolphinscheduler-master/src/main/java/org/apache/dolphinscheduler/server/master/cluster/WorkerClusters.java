@@ -17,7 +17,6 @@
 
 package org.apache.dolphinscheduler.server.master.cluster;
 
-import lombok.Getter;
 import org.apache.dolphinscheduler.common.enums.ServerStatus;
 import org.apache.dolphinscheduler.common.model.WorkerHeartBeat;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
@@ -34,6 +33,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 
 public class WorkerClusters extends AbstractClusterSubscribeListener<WorkerServerMetadata>
         implements
@@ -57,13 +58,14 @@ public class WorkerClusters extends AbstractClusterSubscribeListener<WorkerServe
 
     public List<String> getWorkerServerAddressByGroup(String workerGroup) {
         if (WorkerGroupUtils.getDefaultWorkerGroup().equals(workerGroup)) { // 如果为默认工作组
-            return UnmodifiableList.unmodifiableList(new ArrayList<>(workerMapping.keySet())); // 返回 workerMapping 中的所有键（即所有服务器地址的集合）
+            return UnmodifiableList.unmodifiableList(new ArrayList<>(workerMapping.keySet())); // 返回 workerMapping
+                                                                                               // 中的所有键（即所有服务器地址的集合）
         }
         return workerGroupMapping.getOrDefault(workerGroup, Collections.emptyList()); // 否则获取指定工作组的地址列表
     }
 
     public List<String> getNormalWorkerServerAddressByGroup(String workerGroup) {
-        List<String> normalWorkerAddresses = getWorkerServerAddressByGroup(workerGroup) //获取该工作组的服务器地址列表
+        List<String> normalWorkerAddresses = getWorkerServerAddressByGroup(workerGroup) // 获取该工作组的服务器地址列表
                 .stream()
                 .map(workerMapping::get) // 将地址映射到 workerMapping 中对应的 WorkerServerMetadata 对象
                 .filter(Objects::nonNull)

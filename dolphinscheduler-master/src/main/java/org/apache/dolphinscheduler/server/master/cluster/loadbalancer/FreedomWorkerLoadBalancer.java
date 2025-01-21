@@ -17,18 +17,15 @@
 
 package org.apache.dolphinscheduler.server.master.cluster.loadbalancer;
 
-import lombok.NonNull;
-import org.apache.dolphinscheduler.extract.base.utils.Host;
 import org.apache.dolphinscheduler.extract.base.utils.HostThread;
-import org.apache.dolphinscheduler.server.master.cluster.IClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
-import org.apache.dolphinscheduler.server.master.cluster.WorkerServerMetadata;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The worker load balancer used to select a worker from the {@link WorkerClusters} by random algorithm.
@@ -61,7 +58,8 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
         randomWorkerLoadBalancer = new RandomWorkerLoadBalancer(workerClusters);
         roundRobinWorkerLoadBalancer = new RoundRobinWorkerLoadBalancer(workerClusters);
         fixedWeightedRoundRobinWorkerLoadBalancer = new FixedWeightedRoundRobinWorkerLoadBalancer(workerClusters);
-        dynamicWeightedRoundRobinWorkerLoadBalancer = new DynamicWeightedRoundRobinWorkerLoadBalancer(workerClusters, new WorkerLoadBalancerConfigurationProperties().getDynamicWeightConfigProperties());
+        dynamicWeightedRoundRobinWorkerLoadBalancer = new DynamicWeightedRoundRobinWorkerLoadBalancer(workerClusters,
+                new WorkerLoadBalancerConfigurationProperties().getDynamicWeightConfigProperties());
         weightedRandomWorkerLoadBalancer = new WeightedRandomWorkerLoadBalancer(workerClusters);
         maxMinFairnessWorkerLoadBalancer = new MaxMinFairnessWorkerLoadBalancer(workerClusters);
         flutterWorkerLoadBalancer = new FlutterWorkerLoadBalancer(workerClusters);
@@ -70,9 +68,10 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public Map<Long, HostThread> select(@NotNull String workerGroup, @NotNull TasksExecutionRunnable tasksExecutionRunnable) {
+    public Map<Long, HostThread> select(@NotNull String workerGroup,
+                                        @NotNull TasksExecutionRunnable tasksExecutionRunnable) {
         String type = tasksExecutionRunnable.getDispatchType();
-        switch (type){
+        switch (type) {
             case "MAX_MIN_FAIRNESS":
                 return maxMinFairnessWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             case "FLUTTER":
@@ -87,9 +86,10 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public Optional<String> select(@NotNull String workerGroup, @NotNull ITaskExecutionRunnable ITaskExecutionRunnable) {
+    public Optional<String> select(@NotNull String workerGroup,
+                                   @NotNull ITaskExecutionRunnable ITaskExecutionRunnable) {
         String type = ITaskExecutionRunnable.getWorkflowInstance().getDispatchType();
-        switch (type){
+        switch (type) {
             case "RANDOM":
                 return randomWorkerLoadBalancer.select(workerGroup, ITaskExecutionRunnable);
             case "ROUND_ROBIN":
@@ -111,5 +111,7 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public boolean isMultiDispatcher() { return true; }
+    public boolean isMultiDispatcher() {
+        return true;
+    }
 }

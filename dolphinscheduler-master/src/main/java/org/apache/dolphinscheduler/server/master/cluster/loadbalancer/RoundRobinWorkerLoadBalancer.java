@@ -18,6 +18,7 @@
 package org.apache.dolphinscheduler.server.master.cluster.loadbalancer;
 
 import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
+import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -42,7 +42,8 @@ public class RoundRobinWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public Optional<String> select(@NotNull String workerGroup, @NotNull ITaskExecutionRunnable ITaskExecutionRunnable) {
+    public Optional<String> select(@NotNull String workerGroup,
+                                   @NotNull ITaskExecutionRunnable ITaskExecutionRunnable) {
         List<String> workerServerAddresses = workerClusters.getNormalWorkerServerAddressByGroup(workerGroup);
         if (CollectionUtils.isEmpty(workerServerAddresses)) {
             return Optional.empty();
@@ -59,5 +60,7 @@ public class RoundRobinWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public boolean isMultiDispatcher() { return false; }
+    public boolean isMultiDispatcher() {
+        return false;
+    }
 }

@@ -21,11 +21,9 @@ import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.extract.base.utils.Host;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
-import org.apache.dolphinscheduler.server.master.engine.task.runnable.TaskExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.exception.dispatch.TaskDispatchException;
 import org.apache.dolphinscheduler.server.master.exception.dispatch.WorkerGroupNotFoundException;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,7 +70,8 @@ public abstract class BaseTaskDispatcher implements TaskDispatcher {
             try {
                 taskInstanceDispatchAddress = tasksDispatchHosts.get(taskInstance.getTaskCode())
                         .map(Host::getAddress)
-                        .orElseThrow(() -> new TaskDispatchException("Cannot find the host to execute task: " + taskName));
+                        .orElseThrow(
+                                () -> new TaskDispatchException("Cannot find the host to execute task: " + taskName));
             } catch (WorkerGroupNotFoundException workerGroupNotFoundException) {
                 // todo: this is a temporary solution, we should refactor the ServerNodeManager to make sure there won't
                 // throw WorkerGroupNotFoundException unless the worker group is not exist in database

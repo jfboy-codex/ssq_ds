@@ -19,8 +19,6 @@ package org.apache.dolphinscheduler.server.master.engine.workflow.statemachine;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
@@ -28,7 +26,6 @@ import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
 import org.apache.dolphinscheduler.dao.entity.WorkflowTaskRelation;
 import org.apache.dolphinscheduler.dao.repository.TaskInstanceDao;
 import org.apache.dolphinscheduler.dao.repository.WorkflowInstanceDao;
-import org.apache.dolphinscheduler.extract.base.utils.Host;
 import org.apache.dolphinscheduler.server.master.engine.AbstractLifecycleEvent;
 import org.apache.dolphinscheduler.server.master.engine.WorkflowCacheRepository;
 import org.apache.dolphinscheduler.server.master.engine.WorkflowEventBus;
@@ -42,17 +39,27 @@ import org.apache.dolphinscheduler.server.master.engine.workflow.lifecycle.event
 import org.apache.dolphinscheduler.server.master.engine.workflow.lifecycle.event.WorkflowTopologyLogicalTransitionWithTaskFinishLifecycleEvent;
 import org.apache.dolphinscheduler.server.master.engine.workflow.runnable.IWorkflowExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.utils.WorkflowInstanceUtils;
-import org.apache.dolphinscheduler.server.master.runner.dispatcher.DispatcherHistory;
+import org.apache.dolphinscheduler.service.bean.SpringApplicationContext;
+import org.apache.dolphinscheduler.service.process.ProcessService;
+
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Vector;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.dolphinscheduler.service.bean.SpringApplicationContext;
-import org.apache.dolphinscheduler.service.process.ProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 @Slf4j
 public abstract class AbstractWorkflowStateAction implements IWorkflowStateAction {
@@ -138,14 +145,14 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         List<TaskInstance> currentTaskInstanceList =
                 processService.findTaskInstanceByWorkflowInstanceId(workflowInstance.getId());
         // 定义每个任务的完成时间，初始化为运行时间
-        Map<Long,Long> taskCompletionTimeMap = new HashMap<>();
-        Map<Long,Long> dp = new HashMap<>();
-        Map<Long,Queue<Long>> paths = new HashMap<>();
-        Map<Long,TaskInstance> taskInstanceMap = new HashMap<>();
+        Map<Long, Long> taskCompletionTimeMap = new HashMap<>();
+        Map<Long, Long> dp = new HashMap<>();
+        Map<Long, Queue<Long>> paths = new HashMap<>();
+        Map<Long, TaskInstance> taskInstanceMap = new HashMap<>();
         // 定义邻接表
-        Map<Long,Vector<Long>> taskAdjMap = new HashMap<>();
+        Map<Long, Vector<Long>> taskAdjMap = new HashMap<>();
         // 定义每个任务的入度，初始化为0
-        Map<Long,Integer> taskInDegreeMap = new HashMap<>();
+        Map<Long, Integer> taskInDegreeMap = new HashMap<>();
         for (TaskInstance taskInstance : currentTaskInstanceList) {
             long taskCode = taskInstance.getTaskCode();
             taskInstanceMap.put(taskCode, taskInstance);
@@ -153,8 +160,8 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
             dp.put(taskCode, DateUtils.duration2MS(taskInstance.getCompletionTime()));
             paths.put(taskCode, new LinkedList<>());
             paths.get(taskCode).add(taskCode);
-            taskInDegreeMap.put(taskCode,0);
-            taskAdjMap.put(taskCode,new Vector<>());
+            taskInDegreeMap.put(taskCode, 0);
+            taskAdjMap.put(taskCode, new Vector<>());
         }
         // 计算每个任务的入度和邻接表
         for (WorkflowTaskRelation relation : relationList) {
@@ -166,41 +173,43 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         // 定义拓扑排序后的任务列表
         List<Long> taskOrderedList = new ArrayList<>();
         Queue<Long> queue = new LinkedList<>();
-        for(Map.Entry<Long,Integer> entry : taskInDegreeMap.entrySet()){
-            if(entry.getValue()==0) queue.add(entry.getKey()); // 所有入度为0的节点加入队列
+        for (Map.Entry<Long, Integer> entry : taskInDegreeMap.entrySet()) {
+            if (entry.getValue() == 0)
+                queue.add(entry.getKey()); // 所有入度为0的节点加入队列
         }
         while (!queue.isEmpty()) {
             // 取出队首顶点放入排序列表
             long u = queue.remove();
             taskOrderedList.add(u);
             // 所有后继节点的入度减一，减到0的加入队列
-            for(long v : taskAdjMap.get(u)) {
+            for (long v : taskAdjMap.get(u)) {
                 taskInDegreeMap.merge(v, -1, Integer::sum);
-                if(taskInDegreeMap.get(v) == 0) queue.add(v);
+                if (taskInDegreeMap.get(v) == 0)
+                    queue.add(v);
             }
         }
         // 动态规划计算最大路径
         Queue<Long> keyPath = new LinkedList<>();
         long complentionTime = 0;
-        for(int i=taskOrderedList.size()-1; i>=0; i--){
+        for (int i = taskOrderedList.size() - 1; i >= 0; i--) {
             long u = taskOrderedList.get(i);
             Queue<Long> uPath = paths.get(u);
-            if(taskAdjMap.get(u).isEmpty()) {
+            if (taskAdjMap.get(u).isEmpty()) {
                 dp.put(u, taskCompletionTimeMap.get(u));
             }
             Long next = null;
-            for(long v : taskAdjMap.get(u)) {
+            for (long v : taskAdjMap.get(u)) {
                 long time = dp.get(v) + taskCompletionTimeMap.get(u);
-                if(time > dp.get(u)) {
+                if (time > dp.get(u)) {
                     dp.put(u, time);
                     next = v;
                 }
             }
-            if(next!=null) {
+            if (next != null) {
                 Queue<Long> vPath = paths.get(next);
                 uPath.addAll(vPath);
             }
-            if(dp.get(u) > complentionTime) {
+            if (dp.get(u) > complentionTime) {
                 complentionTime = dp.get(u);
                 keyPath = paths.get(u);
             }
@@ -208,10 +217,10 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
 
         // 更新关键路径上的节点标记
         List<Long> taskList = new ArrayList<>(keyPath);
-        for(int i=0; i<taskList.size(); i++) {
+        for (int i = 0; i < taskList.size(); i++) {
             TaskInstance taskInstance = taskInstanceMap.get(taskList.get(i));
             taskInstance.setKeyFlag(1);
-            if(i<taskList.size()-1) {
+            if (i < taskList.size() - 1) {
                 taskInstance.setNextKeyTask(taskList.get(i + 1));
             }
             processService.updateTaskInstance(taskInstance);
@@ -256,11 +265,11 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
                     .collect(Collectors.toList());
             BiMap<Integer, Long> dispatchBiMap = HashBiMap.create();
             int index = 0;
-            for(long code : sortedUniqueDispatchCodes) {
+            for (long code : sortedUniqueDispatchCodes) {
                 dispatchBiMap.put(index, code);
                 index++;
             }
-            for(TaskInstance taskInstance : taskInstanceList) {
+            for (TaskInstance taskInstance : taskInstanceList) {
                 long dispatchCode = taskInstance.getDispatchCode();
                 taskInstance.setDispatchIndex(dispatchBiMap.inverse().get(dispatchCode));
                 taskInstanceDao.updateById(taskInstance);

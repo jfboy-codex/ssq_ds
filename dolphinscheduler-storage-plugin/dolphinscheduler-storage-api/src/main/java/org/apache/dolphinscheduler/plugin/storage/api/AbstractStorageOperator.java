@@ -24,8 +24,6 @@ import org.apache.dolphinscheduler.spi.enums.ResourceType;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

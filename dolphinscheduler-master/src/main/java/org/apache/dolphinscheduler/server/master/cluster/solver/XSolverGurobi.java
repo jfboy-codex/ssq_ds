@@ -1,21 +1,40 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.dolphinscheduler.server.master.cluster.solver;
 
-import com.google.common.collect.HashBiMap;
-import gurobi.*;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.Table;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.linear.*;
-import org.apache.dolphinscheduler.extract.base.utils.Host;
 import org.apache.dolphinscheduler.extract.base.utils.HostThread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.Table;
+import com.gurobi.gurobi.GRB;
+import com.gurobi.gurobi.GRBEnv;
+import com.gurobi.gurobi.GRBException;
+import com.gurobi.gurobi.GRBLinExpr;
+import com.gurobi.gurobi.GRBModel;
+import com.gurobi.gurobi.GRBVar;
 
 @Slf4j
 public class XSolverGurobi {
@@ -35,8 +54,8 @@ public class XSolverGurobi {
 
     Map<Long, HostThread> taskHostThreadMap = new HashMap<>(); // 存储任务放置位置的结果
 
-
-    public XSolverGurobi(BiMap<Integer, Long> taskBiMap, BiMap<Integer, HostThread> hostThreadBiMap, Table<Long, HostThread, Long> timeTable) {
+    public XSolverGurobi(BiMap<Integer, Long> taskBiMap, BiMap<Integer, HostThread> hostThreadBiMap,
+                         Table<Long, HostThread, Long> timeTable) {
         T = taskBiMap.size();
         J = hostThreadBiMap.size();
         this.taskBiMap = taskBiMap;
@@ -45,14 +64,14 @@ public class XSolverGurobi {
     }
 
     public Map<Long, HostThread> solve() {
-        if(T>J) {
+        if (T > J) {
             log.error("单次调度任务数大于数据中心可执行线程总数!!!");
             return new HashMap<>();
         }
         try {
-            GRBEnv    env   = new GRBEnv();
+            GRBEnv env = new GRBEnv();
             env.set(GRB.IntParam.OutputFlag, 0);
-            GRBModel  model = new GRBModel(env);
+            GRBModel model = new GRBModel(env);
 
             List<GRBVar> xijVars = new ArrayList<>();
             GRBVar k = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "k");
@@ -91,9 +110,9 @@ public class XSolverGurobi {
             }
 
             // 约束条件：对于任意的j属于0-J，所有遍历0-I的xi,j之和小于等于1
-            for (int j=0; j < J; j++) {
+            for (int j = 0; j < J; j++) {
                 GRBLinExpr sumConstraintExpr = new GRBLinExpr();
-                for (int t=0; t < T; t++) {
+                for (int t = 0; t < T; t++) {
                     sumConstraintExpr.addTerm(1, xijVars.get(t * J + j));
                 }
                 model.addConstr(sumConstraintExpr, GRB.LESS_EQUAL, 1, "constraint_3_" + j);
@@ -108,7 +127,7 @@ public class XSolverGurobi {
                 for (int t = 0; t < T; t++) {
                     for (int j = 0; j < J; j++) {
                         int x = (int) xijVars.get(t * J + j).get(GRB.DoubleAttr.X);
-                        if (x==1) {
+                        if (x == 1) {
                             taskHostThreadMap.put(taskBiMap.get(t), hostThreadBiMap.get(j));
                             break;
                         }
@@ -128,7 +147,7 @@ public class XSolverGurobi {
             return taskHostThreadMap;
 
         } catch (GRBException e) {
-            log.info("Error code: {} . {}",  e.getErrorCode(), e.getMessage());
+            log.info("Error code: {} . {}", e.getErrorCode(), e.getMessage());
             return taskHostThreadMap;
         }
     }

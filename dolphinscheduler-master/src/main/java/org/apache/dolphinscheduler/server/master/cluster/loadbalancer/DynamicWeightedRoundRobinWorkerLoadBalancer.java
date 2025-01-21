@@ -20,6 +20,7 @@ package org.apache.dolphinscheduler.server.master.cluster.loadbalancer;
 import org.apache.dolphinscheduler.server.master.cluster.IClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerServerMetadata;
+import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -31,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -79,7 +79,8 @@ public class DynamicWeightedRoundRobinWorkerLoadBalancer implements IWorkerLoadB
     }
 
     @Override
-    public Optional<String> select(@NotNull String workerGroup, @NotNull ITaskExecutionRunnable ITaskExecutionRunnable) {
+    public Optional<String> select(@NotNull String workerGroup,
+                                   @NotNull ITaskExecutionRunnable ITaskExecutionRunnable) {
         List<WeightedServer<WorkerServerMetadata>> weightedServers =
                 workerClusters.getNormalWorkerServerAddressByGroup(workerGroup)
                         .stream()
@@ -117,5 +118,7 @@ public class DynamicWeightedRoundRobinWorkerLoadBalancer implements IWorkerLoadB
     }
 
     @Override
-    public boolean isMultiDispatcher() { return false; }
+    public boolean isMultiDispatcher() {
+        return false;
+    }
 }

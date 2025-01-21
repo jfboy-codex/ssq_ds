@@ -38,7 +38,7 @@ import lombok.NoArgsConstructor;
 public class StorageEntity {
 
     private String fullName;
-    private String userName; //ssq
+    private String userName; // ssq
     private String fileName;
     private String pfullName;
     private boolean isDirectory;

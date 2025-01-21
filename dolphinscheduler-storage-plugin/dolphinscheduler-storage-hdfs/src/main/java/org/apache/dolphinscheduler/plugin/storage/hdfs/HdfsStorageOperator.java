@@ -215,7 +215,7 @@ public class HdfsStorageOperator extends AbstractStorageOperator implements Clos
         if (!fs.exists(path)) {
             return Collections.emptyList();
         }
-//        resourceAbsolutePath = "hdfs://localhost:9000/dolphinscheduler/default/resources";
+        // resourceAbsolutePath = "hdfs://localhost:9000/dolphinscheduler/default/resources";
         return Arrays.stream(fs.listStatus(new Path(resourceAbsolutePath)))
                 .map(this::transformFileStatusToResourceMetadata)
                 .collect(Collectors.toList());
@@ -273,7 +273,7 @@ public class HdfsStorageOperator extends AbstractStorageOperator implements Clos
         return StorageEntity.builder()
                 .fileName(fileStatusPath.getName())
                 .fullName(fileAbsolutePath)
-                .userName(resourceMetaData.getTenant()) //ssq
+                .userName(resourceMetaData.getTenant()) // ssq
                 .pfullName(resourceMetaData.getResourceParentAbsolutePath())
                 .type(resourceMetaData.getResourceType())
                 .isDirectory(fileStatus.isDirectory())

@@ -413,8 +413,7 @@ public final class DateUtils {
         strBuilder = seconds > 0 ? strBuilder.append(seconds).append("s").append(" ") : strBuilder;
         strBuilder = mseconds > 0 ? strBuilder.append(mseconds).append("ms") : strBuilder;
 
-
-        if(strBuilder.toString().isEmpty()) {
+        if (strBuilder.toString().isEmpty()) {
             strBuilder.append("0");
         }
 

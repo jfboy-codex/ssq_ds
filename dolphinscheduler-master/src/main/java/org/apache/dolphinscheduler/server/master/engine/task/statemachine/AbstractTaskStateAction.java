@@ -47,13 +47,13 @@ import org.apache.dolphinscheduler.server.master.engine.workflow.runnable.IWorkf
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
-
-import java.util.Objects;
 
 @Slf4j
 public abstract class AbstractTaskStateAction implements ITaskStateAction {
@@ -217,7 +217,7 @@ public abstract class AbstractTaskStateAction implements ITaskStateAction {
         taskInstance.setEndTime(taskSuccessEvent.getEndTime());
         long duration = DateUtils.differMs(taskInstance.getStartTime(), taskInstance.getEndTime());
         taskInstance.setDuration(DateUtils.format2DurationMS(duration));
-        if(Objects.equals(taskInstance.getExeTime(), "0")) { // 如果预测执行时间为0，则使用真实运行时间计算完成时间
+        if (Objects.equals(taskInstance.getExeTime(), "0")) { // 如果预测执行时间为0，则使用真实运行时间计算完成时间
             long completionTime = DateUtils.duration2MS(taskInstance.getCompletionTime());
             taskInstance.setExeTime(DateUtils.format2DurationMS(duration));
             taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime + duration));

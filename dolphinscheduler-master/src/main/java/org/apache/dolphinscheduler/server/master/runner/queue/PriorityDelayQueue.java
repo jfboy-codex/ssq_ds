@@ -17,7 +17,6 @@
 
 package org.apache.dolphinscheduler.server.master.runner.queue;
 
-import java.util.Iterator;
 import java.util.concurrent.DelayQueue;
 
 import lombok.SneakyThrows;

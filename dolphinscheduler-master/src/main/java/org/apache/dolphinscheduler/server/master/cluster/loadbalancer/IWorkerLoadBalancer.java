@@ -17,20 +17,22 @@
 
 package org.apache.dolphinscheduler.server.master.cluster.loadbalancer;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import org.apache.dolphinscheduler.dao.entity.HostThreadStatus;
-import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.extract.base.utils.Host;
 import org.apache.dolphinscheduler.extract.base.utils.HostThread;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
+import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
+import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.NonNull;
-import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
-import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
 
 /**
  * The worker load balancer used to select a worker from the {@link WorkerClusters} by load balancer algorithm.
@@ -47,11 +49,13 @@ public interface IWorkerLoadBalancer {
         return Optional.empty();
     }
 
-    default Optional<String> select(@NonNull String workerGroup, @NonNull ITaskExecutionRunnable ITaskExecutionRunnable) {
+    default Optional<String> select(@NonNull String workerGroup,
+                                    @NonNull ITaskExecutionRunnable ITaskExecutionRunnable) {
         return Optional.empty();
     }
 
-    default Map<Long, HostThread> select(@NonNull String workerGroup, @NonNull TasksExecutionRunnable tasksExecutionRunnable) {
+    default Map<Long, HostThread> select(@NonNull String workerGroup,
+                                         @NonNull TasksExecutionRunnable tasksExecutionRunnable) {
         return new HashMap<>();
     }
 
@@ -60,21 +64,24 @@ public interface IWorkerLoadBalancer {
         List<HostThreadStatus> threadStatusList = hostThreadStatusList.stream()
                 .filter(v -> host.equals(v.getHost()))
                 .collect(Collectors.toList());
-        threadStatusList.sort((p1,p2) -> (int) (p1.getUsableTimeStamp() - p2.getUsableTimeStamp())); // 排序
+        threadStatusList.sort((p1, p2) -> (int) (p1.getUsableTimeStamp() - p2.getUsableTimeStamp())); // 排序
+        if (threadStatusList.isEmpty()) {
+            return 0;
+        }
         return threadStatusList.get(0).getThreadId();
     }
 
-    default void updateThreadId(@NonNull TasksExecutionRunnable tasksExecutionRunnable){
+    default void updateThreadId(@NonNull TasksExecutionRunnable tasksExecutionRunnable) {
         Map<Long, HostThread> taskHostThreadMap = tasksExecutionRunnable.getTasksHostThreadMap();
         List<HostThreadStatus> hostThreadStatusList = tasksExecutionRunnable.getHostThreadStatusList();
-        hostThreadStatusList.sort((p1,p2) -> (int) (p1.getUsableTimeStamp() - p2.getUsableTimeStamp()));
+        hostThreadStatusList.sort((p1, p2) -> (int) (p1.getUsableTimeStamp() - p2.getUsableTimeStamp()));
         Map<Long, HostThread> newMap = new HashMap<>();
         List<HostThreadStatus> sortList = new ArrayList<>(hostThreadStatusList);
-        for(Map.Entry<Long, HostThread> entry : taskHostThreadMap.entrySet()) {
-            for(HostThreadStatus hostThreadStatus : sortList) {
+        for (Map.Entry<Long, HostThread> entry : taskHostThreadMap.entrySet()) {
+            for (HostThreadStatus hostThreadStatus : sortList) {
                 HostThread oldHostThread = entry.getValue();
                 Host host = oldHostThread.getHost();
-                if(Objects.equals(hostThreadStatus.getHost(), host.getAddress())) {
+                if (Objects.equals(hostThreadStatus.getHost(), host.getAddress())) {
                     newMap.put(entry.getKey(), new HostThread(host, hostThreadStatus.getThreadId()));
                     sortList.remove(hostThreadStatus);
                     break;

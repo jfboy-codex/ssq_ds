@@ -33,7 +33,6 @@ import org.apache.dolphinscheduler.api.utils.Result;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.TaskExecuteType;
 import org.apache.dolphinscheduler.common.utils.CollectionUtils;
-import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.dao.entity.Project;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.dao.entity.User;
@@ -195,7 +194,8 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
         List<User> users = usersService.queryUser(executorIds);
         Map<Integer, User> userMap = users.stream().collect(Collectors.toMap(User::getId, v -> v));
         for (TaskInstance taskInstance : taskInstanceList) {
-            // taskInstance.setDuration(DateUtils.format2Duration(taskInstance.getStartTime(), taskInstance.getEndTime()));
+            // taskInstance.setDuration(DateUtils.format2Duration(taskInstance.getStartTime(),
+            // taskInstance.getEndTime()));
             User user = userMap.get(taskInstance.getExecutorId());
             if (user != null) {
                 taskInstance.setExecutorName(user.getUserName());

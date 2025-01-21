@@ -17,7 +17,6 @@
 
 package org.apache.dolphinscheduler.plugin.task.sql;
 
-import com.obs.services.model.TaskCallback;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.datasource.api.plugin.DataSourceClientProvider;
@@ -313,7 +312,8 @@ public class SqlTask extends AbstractTask {
 
     private String executeQuery(Connection connection, SqlBinds sqlBinds, String handlerType) throws Exception {
         try (PreparedStatement statement = prepareStatementAndBind(connection, sqlBinds)) {
-            log.info("{} statement execute query, for sql: {}", handlerType, SqlBinds.getMiniSqlBinds(sqlBinds).getSql()); // ssq
+            log.info("{} statement execute query, for sql: {}", handlerType,
+                    SqlBinds.getMiniSqlBinds(sqlBinds).getSql()); // ssq
             ResultSet resultSet = statement.executeQuery();
             return resultProcess(resultSet);
         }
@@ -373,8 +373,10 @@ public class SqlTask extends AbstractTask {
                     ParameterUtils.setInParameter(entry.getKey(), stmt, prop.getType(), prop.getValue());
                 }
             }
-            //log.info("prepare statement replace sql : {}, sql parameters : {}", sqlBinds.getSql(), sqlBinds.getParamsMap());
-            log.info("prepare statement replace sql : {}, sql parameters : {}", SqlBinds.getMiniSqlBinds(sqlBinds).getSql(),
+            // log.info("prepare statement replace sql : {}, sql parameters : {}", sqlBinds.getSql(),
+            // sqlBinds.getParamsMap());
+            log.info("prepare statement replace sql : {}, sql parameters : {}",
+                    SqlBinds.getMiniSqlBinds(sqlBinds).getSql(),
                     SqlBinds.getMiniSqlBinds(sqlBinds).getParamsMap());
             return stmt;
         } catch (Exception exception) {
@@ -392,10 +394,11 @@ public class SqlTask extends AbstractTask {
      */
     private void printReplacedSql(String content, String formatSql, String rgex, Map<Integer, Property> sqlParamsMap) {
         // parameter print style
-        if(formatSql.length() <= 200) { // ssq
+        if (formatSql.length() <= 200) { // ssq
             log.info("after replace sql , preparing : {}", formatSql);
         } else {
-            log.info("after replace sql , preparing : {}", formatSql.substring(0, 200) + "......" + formatSql.substring(formatSql.length() - 3));
+            log.info("after replace sql , preparing : {}",
+                    formatSql.substring(0, 200) + "......" + formatSql.substring(formatSql.length() - 3));
         }
         StringBuilder logPrint = new StringBuilder("replaced sql , parameters:");
         if (sqlParamsMap == null) {

@@ -18,16 +18,14 @@
 package org.apache.dolphinscheduler.server.master.runner.dispatcher;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.dolphinscheduler.server.master.cluster.loadbalancer.WorkerLoadBalancerType.*;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Table;
-import lombok.NonNull;
-import lombok.SneakyThrows;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
-import org.apache.dolphinscheduler.dao.entity.*;
+import org.apache.dolphinscheduler.dao.entity.Bandwidth;
+import org.apache.dolphinscheduler.dao.entity.HostThreadStatus;
+import org.apache.dolphinscheduler.dao.entity.IntermediateData;
+import org.apache.dolphinscheduler.dao.entity.TaskDefinition;
+import org.apache.dolphinscheduler.dao.entity.TaskInstance;
+import org.apache.dolphinscheduler.dao.entity.WorkflowTaskRelation;
 import org.apache.dolphinscheduler.extract.base.client.Clients;
 import org.apache.dolphinscheduler.extract.base.utils.Host;
 import org.apache.dolphinscheduler.extract.base.utils.HostThread;
@@ -36,24 +34,35 @@ import org.apache.dolphinscheduler.extract.worker.transportor.TaskInstanceDispat
 import org.apache.dolphinscheduler.extract.worker.transportor.TaskInstanceDispatchResponse;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.server.master.cluster.ClusterManager;
-import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerServerMetadata;
 import org.apache.dolphinscheduler.server.master.cluster.loadbalancer.IWorkerLoadBalancer;
 import org.apache.dolphinscheduler.server.master.cluster.loadbalancer.WorkerLoadBalancerType;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.exception.dispatch.TaskDispatchException;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.dolphinscheduler.service.bean.SpringApplicationContext;
 import org.apache.dolphinscheduler.service.process.ProcessService;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Component;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Table;
 
 @Slf4j
 @Component
@@ -100,14 +109,15 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         Map<Long, Optional<Host>> tasksDispatchHosts = new HashMap<>();
 
         // 如果配置的算法不支持多任务调度就循环执行单任务调度
-        if(!workerLoadBalancer.isMultiDispatcher()) {
+        if (!workerLoadBalancer.isMultiDispatcher()) {
             for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
                 TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
                 tasksDispatchHosts.put(taskInstance.getTaskCode(), getTaskInstanceDispatchHost(taskExecutionRunnable));
             }
         } else {
             // 使用多任务调度算法分发多个任务
-            Map<Long, HostThread> tasksDispatchHostThread = workerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
+            Map<Long, HostThread> tasksDispatchHostThread =
+                    workerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             for (Map.Entry<Long, HostThread> entry : tasksDispatchHostThread.entrySet()) {
                 tasksDispatchHosts.put(entry.getKey(), Optional.of(entry.getValue().getHost()));
             }
@@ -128,7 +138,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         String dispatchType = ITaskExecutionRunnable.getWorkflowInstance().getDispatchType();
         TaskInstance taskInstance = ITaskExecutionRunnable.getTaskInstance();
 
-        if((configType==FREEDOM && Objects.equals(dispatchType, "ON_LINE_TASK_SCHEDULE")) || configType==ON_LINE_TASK_SCHEDULER) { // 在线任务调度
+        if ((configType == WorkerLoadBalancerType.FREEDOM && Objects.equals(dispatchType, "ON_LINE_TASK_SCHEDULE"))
+                || configType == WorkerLoadBalancerType.ON_LINE_TASK_SCHEDULER) { // 在线任务调度
             List<ITaskExecutionRunnable> taskExecutionRunnableList = new ArrayList<>();
             taskExecutionRunnableList.add(ITaskExecutionRunnable);
             Map<Long, Optional<Host>> taskHostMap = getTaskInstancesDispatchHosts(taskExecutionRunnableList);
@@ -146,11 +157,11 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             List<HostThreadStatus> allHostThreadStatusList = processService.queryHostThreadStatus();
             Map<Host, Integer> hostThreadNum = getHostThreadNum();
             List<HostThreadStatus> hostThreadStatusList = new ArrayList<>();
-            for(HostThreadStatus hostThreadStatus : allHostThreadStatusList) {
+            for (HostThreadStatus hostThreadStatus : allHostThreadStatusList) {
                 int threadNum = 0;
-                if(hostThreadNum.get(Host.of(hostThreadStatus.getHost()))!=null) {
+                if (hostThreadNum.get(Host.of(hostThreadStatus.getHost())) != null) {
                     threadNum = hostThreadNum.get(Host.of(hostThreadStatus.getHost()));
-                    if(hostThreadStatus.getThreadId()<threadNum) {
+                    if (hostThreadStatus.getThreadId() < threadNum) {
                         hostThreadStatusList.add(hostThreadStatus);
                     }
                 }
@@ -158,7 +169,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             ITaskExecutionRunnable.setHostThreadStatusList(hostThreadStatusList);
 
             // 分发
-            Optional<HostThread> optionalHostThread = workerLoadBalancer.select(workerGroup, ITaskExecutionRunnable).map(HostThread::of);
+            Optional<HostThread> optionalHostThread =
+                    workerLoadBalancer.select(workerGroup, ITaskExecutionRunnable).map(HostThread::of);
             HostThread hostThread = optionalHostThread.get();
 
             // 更新任务实例相关字段信息
@@ -170,7 +182,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             long completionTime = Math.max(waitTime, transferTime) + exeTime;
             taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime)); // 设置完成时间
             long dispatchEndTime = new Date().getTime();
-            taskInstance.setDispatchTime(DateUtils.format2DurationMS(dispatchEndTime-dispatchStartTime));
+            taskInstance.setDispatchTime(DateUtils.format2DurationMS(dispatchEndTime - dispatchStartTime));
 
             // 更新host线程可用时间
             setHostThreadUsableTime(ITaskExecutionRunnable, hostThread, transferTime, exeTime);
@@ -183,7 +195,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
     public Map<Host, Integer> getHostThreadNum() {
         Map<String, WorkerServerMetadata> workerMapping = this.clusterManager.getWorkerClusters().getWorkerMapping();
         Map<Host, Integer> hostThreadNum = new HashMap<>();
-        for(Map.Entry<String, WorkerServerMetadata> entry : workerMapping.entrySet()) {
+        for (Map.Entry<String, WorkerServerMetadata> entry : workerMapping.entrySet()) {
             hostThreadNum.put(Host.of(entry.getKey()), entry.getValue().getThreadNum());
         }
         return hostThreadNum;
@@ -202,7 +214,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         // 获取任务信息
         BiMap<Integer, Long> taskBiMap = HashBiMap.create();
         int taskIndex = 0;
-        for(ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
+        for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             taskBiMap.put(taskIndex, taskExecutionRunnable.getTaskInstance().getTaskCode());
             taskIndex++;
         }
@@ -212,8 +224,9 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         // 获取带宽信息
         List<Bandwidth> bandwidthList = processService.findDataCenterBandwidth();
         Table<Host, Host, Double> bandwidthTable = HashBasedTable.create(); // a(j,j')
-        for(Bandwidth bandwidth : bandwidthList) {
-            bandwidthTable.put(Host.of(bandwidth.getPreHost()), Host.of(bandwidth.getPostHost()), bandwidth.getBandwidth());
+        for (Bandwidth bandwidth : bandwidthList) {
+            bandwidthTable.put(Host.of(bandwidth.getPreHost()), Host.of(bandwidth.getPostHost()),
+                    bandwidth.getBandwidth());
         }
         tasksExecutionRunnable.setBandwidthList(bandwidthList);
         tasksExecutionRunnable.setBandwidthTable(bandwidthTable);
@@ -223,13 +236,14 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         Map<Host, Integer> hostThreadNum = getHostThreadNum();
         List<HostThreadStatus> hostThreadStatusList = new ArrayList<>();
         Table<Host, Integer, Long> hostUsableTimeTable = HashBasedTable.create();
-        for(HostThreadStatus hostThreadStatus : allHostThreadStatusList) {
+        for (HostThreadStatus hostThreadStatus : allHostThreadStatusList) {
             int threadNum = 0;
-            if(hostThreadNum.get(Host.of(hostThreadStatus.getHost()))!=null) {
+            if (hostThreadNum.get(Host.of(hostThreadStatus.getHost())) != null) {
                 threadNum = hostThreadNum.get(Host.of(hostThreadStatus.getHost()));
-                if(hostThreadStatus.getThreadId()<threadNum) {
+                if (hostThreadStatus.getThreadId() < threadNum) {
                     hostThreadStatusList.add(hostThreadStatus);
-                    hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(), hostThreadStatus.getUsableTimeStamp());
+                    hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(),
+                            hostThreadStatus.getUsableTimeStamp());
                 }
             }
         }
@@ -242,7 +256,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         BiMap<Integer, Long> dataBiMap = HashBiMap.create();
         Map<Long, HostThread> dataHostThreadMap = new HashMap<>();
         int dataIndex = 0;
-        for(long dataCode : tasksNeedTasksData.columnMap().keySet()) {
+        for (long dataCode : tasksNeedTasksData.columnMap().keySet()) {
             dataBiMap.put(dataIndex, dataCode);
             dataIndex++;
         }
@@ -265,7 +279,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
 
     public Table<Long, Long, IntermediateData> getTasksNeedTasksData(@NonNull List<ITaskExecutionRunnable> taskExecutionRunnableList) {
         Table<Long, Long, IntermediateData> taskDataTable = HashBasedTable.create();
-        for(ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
+        for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
             List<TaskInstance> leftTaskInstanceList = getLeftTaskInstanceList(taskExecutionRunnable);
             for (TaskInstance leftTaskInstance : leftTaskInstanceList) {
@@ -294,13 +308,14 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
                 .collect(Collectors.toList());
 
         // 如果没有前置任务，就返回空值
-        if(leftTaskCodeList.isEmpty()) {
+        if (leftTaskCodeList.isEmpty()) {
             return new ArrayList<>();
         }
 
         // 获取当前工作流实例关联的任务实例
         List<TaskInstance> currentTaskInstanceList =
-                processService.findTaskInstanceByWorkflowInstanceId(ITaskExecutionRunnable.getWorkflowInstance().getId());
+                processService
+                        .findTaskInstanceByWorkflowInstanceId(ITaskExecutionRunnable.getWorkflowInstance().getId());
 
         // 获取前置节点跑完的任务实例
         List<TaskInstance> leftTaskInstanceList = currentTaskInstanceList.stream()
@@ -314,7 +329,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
     public long predictExeTime(@NonNull ITaskExecutionRunnable ITaskExecutionRunnable) {
         TaskInstance taskInstance = ITaskExecutionRunnable.getTaskInstance();
         // 获取往期任务实例
-        List<TaskInstance> oldTaskInstanceList = processService.querySuccessTaskInstanceByTaskCode(taskInstance.getTaskCode(), taskInstance.getTaskDefinitionVersion(),10);
+        List<TaskInstance> oldTaskInstanceList = processService.querySuccessTaskInstanceByTaskCode(
+                taskInstance.getTaskCode(), taskInstance.getTaskDefinitionVersion(), 10);
 
         // 用于存储所有的执行时间值
         List<Long> durationList = new ArrayList<>();
@@ -330,14 +346,17 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             sum += duration;
         }
 
-        if(durationList.isEmpty()) return 0;
-        else return (long) (sum / durationList.size());
+        if (durationList.isEmpty())
+            return 0;
+        else
+            return (long) (sum / durationList.size());
     }
 
-    protected void setTasksInstanceInfo(TasksExecutionRunnable tasksExecutionRunnable, Map<Long, HostThread> tasksDispatchHostThread, long dispatchTime) {
+    protected void setTasksInstanceInfo(TasksExecutionRunnable tasksExecutionRunnable,
+                                        Map<Long, HostThread> tasksDispatchHostThread, long dispatchTime) {
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
         long dispatchCode = tasksExecutionRunnable.getDispatchCode();
-        for(ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
+        for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
             HostThread hostThread = tasksDispatchHostThread.get(taskInstance.getTaskCode());
             taskInstance.setThreadId(hostThread.getThreadId());
@@ -349,48 +368,53 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         setCompletionTime(tasksExecutionRunnable);
     }
 
-    protected void setWaitTime(TasksExecutionRunnable tasksExecutionRunnable, Map<Long, HostThread> tasksDispatchHostThread) {
+    protected void setWaitTime(TasksExecutionRunnable tasksExecutionRunnable,
+                               Map<Long, HostThread> tasksDispatchHostThread) {
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
         List<HostThreadStatus> hostThreadStatusList = tasksExecutionRunnable.getHostThreadStatusList();
         Table<Host, Integer, Long> hostUsableTimeTable = HashBasedTable.create();
-        for(HostThreadStatus hostThreadStatus : hostThreadStatusList) {
-            hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(), hostThreadStatus.getUsableTime().getTime());
+        for (HostThreadStatus hostThreadStatus : hostThreadStatusList) {
+            hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(),
+                    hostThreadStatus.getUsableTime().getTime());
         }
-        for(ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
+        for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
             HostThread hostThread = tasksDispatchHostThread.get(taskInstance.getTaskCode());
             Host host = hostThread.getHost();
             int threadId = hostThread.getThreadId();
             long usableTime = hostThreadStatusList.stream()
-                    .filter(v -> host.equals(Host.of(v.getHost())) && threadId==v.getThreadId())
+                    .filter(v -> host.equals(Host.of(v.getHost())) && threadId == v.getThreadId())
                     .map(v -> v.getUsableTime().getTime())
                     .findFirst().get();
             long waitTime = usableTime - taskInstance.getSubmitTime().getTime();
-            if(waitTime < 0) waitTime = 0;
+            if (waitTime < 0)
+                waitTime = 0;
             taskInstance.setWaitTime(DateUtils.format2DurationMS(waitTime));
         }
     }
 
-    protected void setTransferTime(TasksExecutionRunnable tasksExecutionRunnable, Map<Long, HostThread> tasksDispatchHostThread) {
+    protected void setTransferTime(TasksExecutionRunnable tasksExecutionRunnable,
+                                   Map<Long, HostThread> tasksDispatchHostThread) {
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
         Table<Host, Host, Double> bandwidthTable = tasksExecutionRunnable.getBandwidthTable();
         Table<Long, Long, IntermediateData> tasksNeedTasksData = tasksExecutionRunnable.getTasksNeedTasksData();
         Map<Long, HostThread> dataHostThreadMap = tasksExecutionRunnable.getDataHostThreadMap();
-        for(ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
+        for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             long transferTime = 0;
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
             HostThread hostThread = tasksDispatchHostThread.get(taskInstance.getTaskCode());
             Host taskHost = hostThread.getHost();
             Map<Long, IntermediateData> dataMap = tasksNeedTasksData.rowMap().get(taskInstance.getTaskCode());
-            if(dataMap!=null) {
+            if (dataMap != null) {
                 for (Map.Entry<Long, IntermediateData> entry : dataMap.entrySet()) {
                     // tasksNeedTasksData的host可能不准确了
                     Host dataHost = dataHostThreadMap.get(entry.getKey()).getHost();
                     long dataSize = entry.getValue().getDataSize();
                     Double band = bandwidthTable.get(dataHost, taskHost);
                     double bandwidth = 1;
-                    if (band != null) bandwidth = band;
-                    long localTransferTime = (long) (dataSize * 1000 / bandwidth); //单位ms
+                    if (band != null)
+                        bandwidth = band;
+                    long localTransferTime = (long) (dataSize * 1000 / bandwidth); // 单位ms
                     if (localTransferTime >= transferTime) {
                         transferTime = localTransferTime;
                     }
@@ -402,7 +426,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
 
     protected void setCompletionTime(TasksExecutionRunnable tasksExecutionRunnable) {
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
-        for(ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
+        for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
             long waitTime = DateUtils.duration2MS(taskInstance.getWaitTime());
             long transferTime = DateUtils.duration2MS(taskInstance.getTransferTime());
@@ -412,16 +436,17 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         }
     }
 
-    protected void setHostsThreadUsableTime(TasksExecutionRunnable tasksExecutionRunnable, Map<Long, HostThread> tasksDispatchHostThread) {
+    protected void setHostsThreadUsableTime(TasksExecutionRunnable tasksExecutionRunnable,
+                                            Map<Long, HostThread> tasksDispatchHostThread) {
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
         List<HostThreadStatus> hostThreadStatusList = tasksExecutionRunnable.getHostThreadStatusList();
-        for(ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
+        for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
             HostThread hostThread = tasksDispatchHostThread.get(taskInstance.getTaskCode());
             String host = hostThread.getHost().getAddress();
             int threadId = hostThread.getThreadId();
             HostThreadStatus oldHostThreadStatus = hostThreadStatusList.stream()
-                    .filter(v -> host.equals(v.getHost()) && threadId==v.getThreadId())
+                    .filter(v -> host.equals(v.getHost()) && threadId == v.getThreadId())
                     .findFirst().get();
 
             long transferTime = DateUtils.duration2MS(taskInstance.getTransferTime());
@@ -439,7 +464,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         }
     }
 
-    @SneakyThrows //简化异常处理
+    @SneakyThrows // 简化异常处理
     public Map<Host, Long> getHostData(@NonNull ITaskExecutionRunnable ITaskExecutionRunnable) {
         // 获取前置节点任务实例
         List<TaskInstance> leftTaskInstanceList = getLeftTaskInstanceList(ITaskExecutionRunnable);
@@ -450,7 +475,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             Host host = Host.of(taskInstance.getHost());
             // 求出数据大小，单位比特
             long dataSize = taskInstance.getOutResult().getBytes(StandardCharsets.UTF_8).length * 8L;
-            if (hostDataMap.get(host)!=null) {
+            if (hostDataMap.get(host) != null) {
                 dataSize += hostDataMap.get(host);
             }
             hostDataMap.put(host, dataSize);
@@ -459,7 +484,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         return hostDataMap;
     }
 
-    protected long getTransferTime(ITaskExecutionRunnable ITaskExecutionRunnable, Optional<HostThread> optionalHostThread) {
+    protected long getTransferTime(ITaskExecutionRunnable ITaskExecutionRunnable,
+                                   Optional<HostThread> optionalHostThread) {
         long transferTime = 0;
         Map<Host, Long> hostDataMap = ITaskExecutionRunnable.getTaskNeedHostData();
         for (Map.Entry<Host, Long> entry : hostDataMap.entrySet()) {
@@ -469,8 +495,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
                     .filter(v -> preHost.equals(v.getPreHost()) && postHost.equals(v.getPostHost()))
                     .map(Bandwidth::getBandwidth)
                     .findFirst().get();
-            long localTransferTime = (long) (entry.getValue() * 1000 / bandwidth); //单位ms
-            if(localTransferTime >= transferTime) {
+            long localTransferTime = (long) (entry.getValue() * 1000 / bandwidth); // 单位ms
+            if (localTransferTime >= transferTime) {
                 transferTime = localTransferTime;
             }
         }
@@ -482,21 +508,24 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         HostThread hostThread = optionalHostThread.get();
 
         Table<Host, Integer, Long> hostUsableTimeTable = HashBasedTable.create();
-        for(HostThreadStatus hostThreadStatus : ITaskExecutionRunnable.getHostThreadStatusList()) {
-            hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(), hostThreadStatus.getUsableTime().getTime());
+        for (HostThreadStatus hostThreadStatus : ITaskExecutionRunnable.getHostThreadStatusList()) {
+            hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(),
+                    hostThreadStatus.getUsableTime().getTime());
         }
         Host host = hostThread.getHost();
         int threadId = hostThread.getThreadId();
         long usableTime = ITaskExecutionRunnable.getHostThreadStatusList().stream()
-                .filter(v -> host.equals(Host.of(v.getHost())) && threadId==v.getThreadId())
+                .filter(v -> host.equals(Host.of(v.getHost())) && threadId == v.getThreadId())
                 .map(v -> v.getUsableTime().getTime())
                 .findFirst().get();
         long waitTime = usableTime - taskInstance.getSubmitTime().getTime();
-        if(waitTime < 0) waitTime = 0;
+        if (waitTime < 0)
+            waitTime = 0;
         return waitTime;
     }
 
-    protected void setHostThreadUsableTime(ITaskExecutionRunnable ITaskExecutionRunnable, HostThread hostThread, long transferTime, long exeTime) {
+    protected void setHostThreadUsableTime(ITaskExecutionRunnable ITaskExecutionRunnable, HostThread hostThread,
+                                           long transferTime, long exeTime) {
 
         TaskInstance taskInstance = ITaskExecutionRunnable.getTaskInstance();
 
@@ -504,7 +533,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         String hostAddress = hostThread.getHost().getAddress();
         int threadId = hostThread.getThreadId();
         HostThreadStatus oldHostThreadStatus = ITaskExecutionRunnable.getHostThreadStatusList().stream()
-                .filter(v -> hostAddress.equals(v.getHost()) && threadId==v.getThreadId())
+                .filter(v -> hostAddress.equals(v.getHost()) && threadId == v.getThreadId())
                 .findFirst().get();
 
         // 计算可用时间点

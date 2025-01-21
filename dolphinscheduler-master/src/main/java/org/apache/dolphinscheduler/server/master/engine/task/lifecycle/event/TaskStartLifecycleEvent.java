@@ -17,7 +17,6 @@
 
 package org.apache.dolphinscheduler.server.master.engine.task.lifecycle.event;
 
-import lombok.Data;
 import org.apache.dolphinscheduler.server.master.engine.ILifecycleEventType;
 import org.apache.dolphinscheduler.server.master.engine.task.lifecycle.AbstractTaskLifecycleEvent;
 import org.apache.dolphinscheduler.server.master.engine.task.lifecycle.TaskLifecycleEventType;

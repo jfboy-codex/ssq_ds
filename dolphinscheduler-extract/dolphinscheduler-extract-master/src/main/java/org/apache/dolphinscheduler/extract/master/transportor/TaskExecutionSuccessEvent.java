@@ -59,8 +59,8 @@ public class TaskExecutionSuccessEvent implements ITaskExecutionEvent {
     public String toString() {
         int miniSize = 200;
         String miniVarPool;
-        if (varPool.length()>200) {
-            miniVarPool = varPool.substring(0, miniSize) + "......" + varPool.substring(varPool.length()-5);
+        if (varPool.length() > 200) {
+            miniVarPool = varPool.substring(0, miniSize) + "......" + varPool.substring(varPool.length() - 5);
         } else {
             miniVarPool = varPool;
         }

@@ -17,8 +17,6 @@
 
 package org.apache.dolphinscheduler.plugin.task.api.enums;
 
-import java.io.Serializable;
-
 /**
  * parameter of stored procedure
  */

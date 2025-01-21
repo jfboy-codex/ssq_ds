@@ -17,16 +17,7 @@
 
 package org.apache.dolphinscheduler.server.master.cluster.loadbalancer;
 
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Table;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
-import org.apache.dolphinscheduler.dao.entity.Bandwidth;
-import org.apache.dolphinscheduler.dao.entity.HostThreadStatus;
 import org.apache.dolphinscheduler.dao.entity.IntermediateData;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.extract.base.utils.Host;
@@ -34,17 +25,28 @@ import org.apache.dolphinscheduler.extract.base.utils.HostThread;
 import org.apache.dolphinscheduler.server.master.cluster.IClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerServerMetadata;
-import org.apache.dolphinscheduler.server.master.cluster.solver.XFairSolverGurobi;
 import org.apache.dolphinscheduler.server.master.cluster.solver.XSolverGurobi;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
-import org.apache.dolphinscheduler.service.bean.SpringApplicationContext;
-import org.apache.dolphinscheduler.service.process.ProcessService;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Table;
 
 /**
  * The worker load balancer used to select a worker from the {@link WorkerClusters} by random algorithm.
@@ -55,7 +57,6 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
     private final WorkerClusters workerClusters;
 
     private final Map<String, WeightedServer<WorkerServerMetadata>> weightedServerMap = new ConcurrentHashMap<>();
-
 
     public MaxMinFairnessWorkerLoadBalancer(WorkerClusters workerClusters) {
         this.workerClusters = workerClusters;
@@ -84,7 +85,8 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public Map<Long, HostThread> select(@NotNull String workerGroup, @NotNull TasksExecutionRunnable tasksExecutionRunnable) {
+    public Map<Long, HostThread> select(@NotNull String workerGroup,
+                                        @NotNull TasksExecutionRunnable tasksExecutionRunnable) {
 
         // 获取服务器集群信息
         List<WeightedServer<WorkerServerMetadata>> weightedServers =
@@ -119,7 +121,7 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
         List<Long> timeList = new ArrayList<>();
 
         int num = taskBiMap.size();
-        while(num > 0) {
+        while (num > 0) {
             XSolverGurobi xSolverGurobi = new XSolverGurobi(dynamicTaskBiMap, dynamicHostThreadBiMap, timeTable);
             Map<Long, HostThread> taskHostThreadMap = xSolverGurobi.solve();
             long optimalTime = xSolverGurobi.getOptimalTime();
@@ -143,8 +145,8 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
         updateThreadId(tasksExecutionRunnable); // 更新线程
         Map<Long, HostThread> taskHostThreadMap = tasksExecutionRunnable.getTasksHostThreadMap();
 
-
-        System.out.println("***************************************MaxMinFairness算法内部***************************************");
+        System.out.println(
+                "***************************************MaxMinFairness算法内部***************************************");
         System.out.println("---调度参数---");
         System.out.printf("数据中心线程总数: %d\n", hostThreadBiMap.size());
         System.out.printf("任务总数: %d 任务: %s\n", taskBiMap.size(), taskBiMap);
@@ -152,7 +154,8 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
         System.out.printf("迭代次数: %d 迭代结果: %s\n", timeList.size(), timeList);
         System.out.println("---调度结果---");
         System.out.println("任务位置: " + taskHostThreadMap);
-        System.out.println("***************************************************************************************************");
+        System.out.println(
+                "***************************************************************************************************");
 
         return taskHostThreadMap;
     }
@@ -160,9 +163,9 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
     public BiMap<Integer, Long> getNewTaskBiMap(BiMap<Integer, Long> taskBiMap, long deleteTaskCode) {
         BiMap<Integer, Long> newTaskBiMap = HashBiMap.create();
         int index = 0;
-        for(int i=0; i<taskBiMap.size(); i++) {
+        for (int i = 0; i < taskBiMap.size(); i++) {
             long taskCode = taskBiMap.get(i);
-            if(taskCode!=deleteTaskCode) {
+            if (taskCode != deleteTaskCode) {
                 newTaskBiMap.put(index, taskCode);
                 index++;
             }
@@ -170,12 +173,14 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
         return newTaskBiMap;
     }
 
-    public BiMap<Integer, HostThread> getNewHostThreadBiMap(BiMap<Integer, HostThread> hostThreadBiMap, HostThread deleteHostThread) {
+    public BiMap<Integer, HostThread> getNewHostThreadBiMap(BiMap<Integer, HostThread> hostThreadBiMap,
+                                                            HostThread deleteHostThread) {
         BiMap<Integer, HostThread> newHostThreadBiMap = HashBiMap.create();
         int index = 0;
-        for(int i=0; i<hostThreadBiMap.size(); i++) {
+        for (int i = 0; i < hostThreadBiMap.size(); i++) {
             HostThread hostThread = hostThreadBiMap.get(i);
-            if(hostThread.getHost()!=deleteHostThread.getHost() || !Objects.equals(hostThread.getThreadId(), deleteHostThread.getThreadId())) {
+            if (hostThread.getHost() != deleteHostThread.getHost()
+                    || !Objects.equals(hostThread.getThreadId(), deleteHostThread.getThreadId())) {
                 newHostThreadBiMap.put(index, hostThread);
                 index++;
             }
@@ -183,7 +188,8 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
         return newHostThreadBiMap;
     }
 
-    public Table<Long, HostThread, Long> getXTimeTable(List<WeightedServer<WorkerServerMetadata>> weightedServers, TasksExecutionRunnable tasksExecutionRunnable) {
+    public Table<Long, HostThread, Long> getXTimeTable(List<WeightedServer<WorkerServerMetadata>> weightedServers,
+                                                       TasksExecutionRunnable tasksExecutionRunnable) {
 
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
         Table<Host, Host, Double> bandwidthTable = tasksExecutionRunnable.getBandwidthTable();
@@ -205,15 +211,16 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
                     // 计算传输时间，由所需各数据的最大传输时间决定
                     long transferTime = 0;
                     Map<Long, IntermediateData> dataMap = tasksNeedTasksDataTable.rowMap().get(taskCode);
-                    if(dataMap!=null) {
+                    if (dataMap != null) {
                         for (Map.Entry<Long, IntermediateData> entry : dataMap.entrySet()) {
                             // tasksNeedTasksData的host可能不准确了
                             Host dataHost = dataHostThreadMap.get(entry.getKey()).getHost();
                             long dataSize = entry.getValue().getDataSize();
                             Double band = bandwidthTable.get(dataHost, taskHost);
                             double bandwidth = 1;
-                            if (band != null) bandwidth = band;
-                            long localTransferTime = (long) (dataSize * 1000 / bandwidth); //单位ms
+                            if (band != null)
+                                bandwidth = band;
+                            long localTransferTime = (long) (dataSize * 1000 / bandwidth); // 单位ms
                             if (localTransferTime >= transferTime) {
                                 transferTime = localTransferTime;
                             }
@@ -235,5 +242,7 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public boolean isMultiDispatcher() { return true; }
+    public boolean isMultiDispatcher() {
+        return true;
+    }
 }

@@ -23,7 +23,6 @@ import org.apache.dolphinscheduler.server.master.runner.queue.PriorityDelayQueue
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -80,8 +79,8 @@ public class GlobalTaskDispatchWaitingQueue {
         // delayQueue确保了只有延迟时间到了才能取出，且默认按延迟时间排序
         DelayEntry<ITaskExecutionRunnable> delayEntry = priorityDelayQueue.poll();
         ITaskExecutionRunnable taskExecutionRunnable = null;
-        if(delayEntry!=null) {
-            taskExecutionRunnable =delayEntry.getData();
+        if (delayEntry != null) {
+            taskExecutionRunnable = delayEntry.getData();
             markTaskExecutionRunnableRemoved(taskExecutionRunnable);
         }
         return taskExecutionRunnable;

@@ -17,16 +17,7 @@
 
 package org.apache.dolphinscheduler.server.master.cluster.loadbalancer;
 
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Table;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
-import org.apache.dolphinscheduler.dao.entity.Bandwidth;
-import org.apache.dolphinscheduler.dao.entity.HostThreadStatus;
 import org.apache.dolphinscheduler.dao.entity.IntermediateData;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.extract.base.utils.Host;
@@ -40,11 +31,25 @@ import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecu
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
 import org.apache.dolphinscheduler.service.bean.SpringApplicationContext;
 import org.apache.dolphinscheduler.service.process.ProcessService;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Table;
 
 /**
  * The worker load balancer used to select a worker from the {@link WorkerClusters} by random algorithm.
@@ -57,7 +62,6 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
     private final WorkerClusters workerClusters;
 
     private final Map<String, WeightedServer<WorkerServerMetadata>> weightedServerMap = new ConcurrentHashMap<>();
-
 
     public TaskDataScheduleWorkerLoadBalancer(WorkerClusters workerClusters) {
         this.workerClusters = workerClusters;
@@ -86,7 +90,8 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public Map<Long, HostThread> select(@NotNull String workerGroup, @NotNull TasksExecutionRunnable tasksExecutionRunnable) {
+    public Map<Long, HostThread> select(@NotNull String workerGroup,
+                                        @NotNull TasksExecutionRunnable tasksExecutionRunnable) {
 
         // 获取服务器集群信息
         List<WeightedServer<WorkerServerMetadata>> weightedServers =
@@ -119,12 +124,12 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
 
         List<Long> timeList = new ArrayList<>();
 
-        if(dataBiMap.isEmpty()) {   // 没有数据就只进行任务调度
+        if (dataBiMap.isEmpty()) { // 没有数据就只进行任务调度
             Table<Long, HostThread, Long> timeTable = getXTimeTable(weightedServers, tasksExecutionRunnable); // s(t,j)
             XSolverGurobi xSolverGurobi = new XSolverGurobi(taskBiMap, hostThreadBiMap, timeTable);
             tasksExecutionRunnable.setTasksHostThreadMap(xSolverGurobi.solve());
             timeList.add(xSolverGurobi.getOptimalTime());
-        } else {    // 任务调度和数据调度迭代
+        } else { // 任务调度和数据调度迭代
             int num = 0;
             while (num < 10) {
                 if (num % 2 == 0) {
@@ -132,15 +137,17 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
                     XSolverGurobi xSolverGurobi = new XSolverGurobi(taskBiMap, hostThreadBiMap, timeTable);
                     tasksExecutionRunnable.setTasksHostThreadMap(xSolverGurobi.solve());
                     timeList.add(xSolverGurobi.getOptimalTime());
-                    if(timeList.size()>1) {
-                        if (Objects.equals(timeList.get(timeList.size() - 1), timeList.get(timeList.size() - 2))) break;
+                    if (timeList.size() > 1) {
+                        if (Objects.equals(timeList.get(timeList.size() - 1), timeList.get(timeList.size() - 2)))
+                            break;
                     }
                 } else {
                     Table<Long, HostThread, Long> timeTable = getYTimeTable(weightedServers, tasksExecutionRunnable);
                     YSolverGurobi ySolverGurobi = new YSolverGurobi(dataBiMap, hostThreadBiMap, timeTable);
                     tasksExecutionRunnable.setDataHostThreadMap(ySolverGurobi.solve());
                     timeList.add(ySolverGurobi.getOptimalTime());
-                    if(Objects.equals(timeList.get(timeList.size() - 1), timeList.get(timeList.size() - 2))) break;
+                    if (Objects.equals(timeList.get(timeList.size() - 1), timeList.get(timeList.size() - 2)))
+                        break;
                 }
                 num++;
             }
@@ -149,7 +156,8 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
         Map<Long, HostThread> taskHostThreadMap = tasksExecutionRunnable.getTasksHostThreadMap();
         Map<Long, HostThread> dataHostThreadMap = tasksExecutionRunnable.getDataHostThreadMap();
 
-        System.out.println("****************************************任务数据协同调度算法内部****************************************");
+        System.out.println(
+                "****************************************任务数据协同调度算法内部****************************************");
         System.out.println("---调度参数---");
         System.out.printf("数据中心线程总数: %d\n", hostThreadBiMap.size());
         System.out.printf("任务总数: %d 任务: %s\n", taskBiMap.size(), taskBiMap);
@@ -159,7 +167,8 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
         System.out.println("---调度结果---");
         System.out.println("任务位置: " + taskHostThreadMap);
         System.out.println("数据位置: " + dataHostThreadMap);
-        System.out.println("***************************************************************************************************");
+        System.out.println(
+                "***************************************************************************************************");
 
         // 更新数据库数据位置
         Table<Long, Long, IntermediateData> tasksNeedTasksData = tasksExecutionRunnable.getTasksNeedTasksData();
@@ -167,8 +176,8 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
             TaskInstance taskInstance = cell.getValue().getTaskInstance();
             long taskCode = taskInstance.getTaskCode();
             HostThread dataHostThread = dataHostThreadMap.get(taskCode);
-            if(dataHostThread!=null) {
-                //TODO tasksNeedTasksData更新
+            if (dataHostThread != null) {
+                // TODO tasksNeedTasksData更新
                 taskInstance.setDataHost(dataHostThread.getHost().getAddress());
             }
             processService.updateTaskInstance(taskInstance);
@@ -176,7 +185,8 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
         return taskHostThreadMap;
     }
 
-    public Table<Long, HostThread, Long> getYTimeTable(List<WeightedServer<WorkerServerMetadata>> weightedServers, TasksExecutionRunnable tasksExecutionRunnable) {
+    public Table<Long, HostThread, Long> getYTimeTable(List<WeightedServer<WorkerServerMetadata>> weightedServers,
+                                                       TasksExecutionRunnable tasksExecutionRunnable) {
 
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
         Table<Host, Host, Double> bandwidthTable = tasksExecutionRunnable.getBandwidthTable();
@@ -201,7 +211,8 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
 
                         // 计算等待时间
                         long waitTime = 0;
-                        Long usableTime = hostUsableTimeTable.get(taskHostThread.getHost(), taskHostThread.getThreadId());
+                        Long usableTime =
+                                hostUsableTimeTable.get(taskHostThread.getHost(), taskHostThread.getThreadId());
                         if (usableTime != null && usableTime > taskInstance.getSubmitTime().getTime()) {
                             waitTime = usableTime - taskInstance.getSubmitTime().getTime();
                         }
@@ -209,10 +220,12 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
                         // 计算传输时间
                         long dataSize = 0;
                         IntermediateData iData = tasksNeedTasksDataTable.get(taskCode, dataCode);
-                        if(iData!=null) dataSize = iData.getDataSize();
+                        if (iData != null)
+                            dataSize = iData.getDataSize();
                         Double band = bandwidthTable.get(dataHost, taskHostThread.getHost());
                         double bandwidth = 1;
-                        if(band!=null) bandwidth = band;
+                        if (band != null)
+                            bandwidth = band;
                         long transferTime = (long) (dataSize * 1000 / bandwidth);
 
                         // 计算执行时间
@@ -221,7 +234,7 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
                         // 计算完成时间
                         long completionTime = Math.max(waitTime, transferTime) + exeTime;
 
-                        if(completionTime > time) {
+                        if (completionTime > time) {
                             time = completionTime;
                         }
                     }
@@ -232,7 +245,8 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
         return timeTable;
     }
 
-    public Table<Long, HostThread, Long> getXTimeTable(List<WeightedServer<WorkerServerMetadata>> weightedServers, TasksExecutionRunnable tasksExecutionRunnable) {
+    public Table<Long, HostThread, Long> getXTimeTable(List<WeightedServer<WorkerServerMetadata>> weightedServers,
+                                                       TasksExecutionRunnable tasksExecutionRunnable) {
 
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
         Table<Host, Host, Double> bandwidthTable = tasksExecutionRunnable.getBandwidthTable();
@@ -262,29 +276,30 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
                     // 计算传输时间，由所需各数据的最大传输时间决定
                     long transferTime = 0;
                     Map<Long, IntermediateData> dataMap = tasksNeedTasksDataTable.rowMap().get(taskCode);
-                    if(dataMap!=null) {
+                    if (dataMap != null) {
                         for (Map.Entry<Long, IntermediateData> entry : dataMap.entrySet()) {
                             // tasksNeedTasksData的host可能不准确了
                             Host dataHost = dataHostThreadMap.get(entry.getKey()).getHost();
                             long dataSize = entry.getValue().getDataSize();
                             Double band = bandwidthTable.get(dataHost, taskHost);
                             double bandwidth = 1;
-                            if (band != null) bandwidth = band;
-                            long localTransferTime = (long) (dataSize * 1000 / bandwidth); //单位ms
+                            if (band != null)
+                                bandwidth = band;
+                            long localTransferTime = (long) (dataSize * 1000 / bandwidth); // 单位ms
                             if (localTransferTime >= transferTime) {
                                 transferTime = localTransferTime;
                             }
                         }
                     }
-//                    for (Table.Cell<Long, Long, IntermediateData> cell : tasksNeedTasksDataTable.cellSet()) {
-//                        // Host dataHost = Host.of(cell.getValue().getHost()); // 初始位置
-//                        Host dataHost = dataHostThreadMap.get(cell.getValue().getTaskInstance().getTaskCode()).getHost();
-//                        Double band = bandwidthTable.get(dataHost, taskHost);
-//                        double bandwidth = 1;
-//                        if (band != null) bandwidth = band;
-//                        long localTransferTime = (long) (cell.getValue().getDataSize() * 1000 / bandwidth);
-//                        if (localTransferTime > transferTime) transferTime = localTransferTime;
-//                    }
+                    // for (Table.Cell<Long, Long, IntermediateData> cell : tasksNeedTasksDataTable.cellSet()) {
+                    // // Host dataHost = Host.of(cell.getValue().getHost()); // 初始位置
+                    // Host dataHost = dataHostThreadMap.get(cell.getValue().getTaskInstance().getTaskCode()).getHost();
+                    // Double band = bandwidthTable.get(dataHost, taskHost);
+                    // double bandwidth = 1;
+                    // if (band != null) bandwidth = band;
+                    // long localTransferTime = (long) (cell.getValue().getDataSize() * 1000 / bandwidth);
+                    // if (localTransferTime > transferTime) transferTime = localTransferTime;
+                    // }
 
                     // 计算完成时间
                     long completionTime = Math.max(waitTime, transferTime) + exeTime;
@@ -301,5 +316,7 @@ public class TaskDataScheduleWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public boolean isMultiDispatcher() { return true; }
+    public boolean isMultiDispatcher() {
+        return true;
+    }
 }

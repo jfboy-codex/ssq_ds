@@ -118,7 +118,7 @@ public class TaskInstance implements Serializable {
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String cacheKey;
 
-//    @TableField(exist = false)
+    // @TableField(exist = false)
     private String duration;
 
     private int maxRetryTimes;

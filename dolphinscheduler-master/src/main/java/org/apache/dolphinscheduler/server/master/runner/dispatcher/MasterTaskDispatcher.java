@@ -17,7 +17,6 @@
 
 package org.apache.dolphinscheduler.server.master.runner.dispatcher;
 
-import org.apache.dolphinscheduler.dao.entity.HostThreadStatus;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.extract.base.utils.Host;
 import org.apache.dolphinscheduler.extract.master.ILogicTaskInstanceOperator;
@@ -26,7 +25,6 @@ import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskDispatchR
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.server.master.config.MasterConfig;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
-import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.exception.dispatch.TaskDispatchException;
 
 import java.util.HashMap;
@@ -85,7 +83,7 @@ public class MasterTaskDispatcher extends BaseTaskDispatcher {
         Map<Long, Optional<Host>> tasksDispatchHosts = new HashMap<>();
         for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
-            tasksDispatchHosts.put(taskInstance.getTaskCode(),masterTaskExecuteHost);
+            tasksDispatchHosts.put(taskInstance.getTaskCode(), masterTaskExecuteHost);
         }
         return tasksDispatchHosts;
     }

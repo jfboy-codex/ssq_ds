@@ -17,22 +17,25 @@
 
 package org.apache.dolphinscheduler.server.master.cluster.loadbalancer;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.dolphinscheduler.dao.entity.HostThreadStatus;
-import org.apache.dolphinscheduler.extract.base.utils.HostThread;
 import org.apache.dolphinscheduler.server.master.cluster.IClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerServerMetadata;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
-import org.jetbrains.annotations.NotNull;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The worker load balancer used to select a worker from the {@link WorkerClusters} by random algorithm.
@@ -75,7 +78,8 @@ public class WeightedRandomWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public Optional<String> select(@NotNull String workerGroup, @NotNull ITaskExecutionRunnable ITaskExecutionRunnable) {
+    public Optional<String> select(@NotNull String workerGroup,
+                                   @NotNull ITaskExecutionRunnable ITaskExecutionRunnable) {
         List<WeightedServer<WorkerServerMetadata>> weightedServers =
                 workerClusters.getNormalWorkerServerAddressByGroup(workerGroup)
                         .stream()
@@ -115,5 +119,7 @@ public class WeightedRandomWorkerLoadBalancer implements IWorkerLoadBalancer {
     }
 
     @Override
-    public boolean isMultiDispatcher() { return false; }
+    public boolean isMultiDispatcher() {
+        return false;
+    }
 }

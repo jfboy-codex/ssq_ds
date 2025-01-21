@@ -1,8 +1,24 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.dolphinscheduler.server.master.cluster.solver;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.Table;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.dolphinscheduler.extract.base.utils.Host;
+
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.linear.LinearConstraint;
@@ -11,10 +27,14 @@ import org.apache.commons.math3.optim.linear.LinearObjectiveFunction;
 import org.apache.commons.math3.optim.linear.NonNegativeConstraint;
 import org.apache.commons.math3.optim.linear.Relationship;
 import org.apache.commons.math3.optim.linear.SimplexSolver;
-import org.apache.dolphinscheduler.extract.base.utils.Host;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.Table;
 
 @Slf4j
 public class XSolverMath {
@@ -28,16 +48,17 @@ public class XSolverMath {
     private final double[] objectiveCoefficients; // 目标函数系数
     private final List<LinearConstraint> constraints = new ArrayList<>(); // 约束条件
 
-    public XSolverMath(BiMap<Integer, Long> taskBiMap, BiMap<Integer, Host> hostBiMap, Table<Long, Host, Long> timeTable) {
+    public XSolverMath(BiMap<Integer, Long> taskBiMap, BiMap<Integer, Host> hostBiMap,
+                       Table<Long, Host, Long> timeTable) {
         T = taskBiMap.size();
         J = hostBiMap.size();
         this.timeTable = timeTable;
-        int paramsNum = T*J + 1; // 参数数量，s和x(t,j)
+        int paramsNum = T * J + 1; // 参数数量，s和x(t,j)
 
         // 定义目标函数的系数
         objectiveCoefficients = new double[paramsNum];
         // s的系数设为1，x(t,j)的系数设为0（因为目标函数只是k）
-        objectiveCoefficients[paramsNum-1] = 1;
+        objectiveCoefficients[paramsNum - 1] = 1;
 
         // 约束条件：x(t,j) * s(t,j) - k <= 0
         for (int t = 0; t < T; t++) {
@@ -70,13 +91,14 @@ public class XSolverMath {
 
         // 使用单纯形法求解
         SimplexSolver solver = new SimplexSolver();
-        PointValuePair solution = solver.optimize(objectiveFunction, constraintSet, new NonNegativeConstraint(true), new MaxIter(1000));
+        PointValuePair solution =
+                solver.optimize(objectiveFunction, constraintSet, new NonNegativeConstraint(true), new MaxIter(1000));
 
         // 输出结果
         double[] point = solution.getPoint();
-        log.info("task completion time = {}", point[point.length-1]);
-        for (int i = 0; i < point.length-1; i++) {
-            log.info("x({},{})={}", i/J, i%J, point[i]);
+        log.info("task completion time = {}", point[point.length - 1]);
+        for (int i = 0; i < point.length - 1; i++) {
+            log.info("x({},{})={}", i / J, i % J, point[i]);
         }
     }
 }

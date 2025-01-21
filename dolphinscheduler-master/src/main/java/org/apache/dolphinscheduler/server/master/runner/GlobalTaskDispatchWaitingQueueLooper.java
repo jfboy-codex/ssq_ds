@@ -25,7 +25,12 @@ import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecu
 import org.apache.dolphinscheduler.server.master.runner.dispatcher.TaskDispatchFactory;
 import org.apache.dolphinscheduler.server.master.runner.dispatcher.TaskDispatcher;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +82,7 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
 
             // poll方法取不到会返回null，不会堵塞
             ITaskExecutionRunnable taskExecutionRunnable = globalTaskDispatchWaitingQueue.pollTaskExecuteRunnable();
-            if(taskExecutionRunnable != null) {
+            if (taskExecutionRunnable != null) {
                 String taskType = taskExecutionRunnable.getTaskInstance().getTaskType();
                 String dispatchType = taskExecutionRunnable.getWorkflowInstance().getDispatchType();
                 // 如果为逻辑任务或不支持多任务调度则直接分发
@@ -90,15 +95,16 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
             }
 
             // 如果超出间隔时间就对池内的任务进行分发
-            if(currentTime - lastUpdateTime > intervalTime) {
-                if(!taskDispatchAblePool.isEmpty()) doMultiDispatch();
+            if (currentTime - lastUpdateTime > intervalTime) {
+                if (!taskDispatchAblePool.isEmpty())
+                    doMultiDispatch();
             }
         }
     }
 
     void doMultiDispatch() {
         List<ITaskExecutionRunnable> taskExecutionRunnableList = new ArrayList<>();
-        Map<Long,ITaskExecutionRunnable> taskExecutionRunnableMap = new HashMap<>();
+        Map<Long, ITaskExecutionRunnable> taskExecutionRunnableMap = new HashMap<>();
         while (!taskDispatchAblePool.isEmpty()) {
             ITaskExecutionRunnable taskExecutionRunnable = taskDispatchAblePool.poll(); // 取出
             final TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
@@ -107,7 +113,7 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
                 log.warn("The TaskInstance {} state is : {}, will not dispatch", taskInstance.getName(), status);
             } else {
                 long taskCode = taskExecutionRunnable.getTaskInstance().getTaskCode();
-                if(taskExecutionRunnableMap.get(taskCode)!=null) {
+                if (taskExecutionRunnableMap.get(taskCode) != null) {
                     System.out.println("旧: " + taskExecutionRunnableMap.get(taskCode));
                     System.out.println("新: " + taskExecutionRunnable);
                 }
@@ -115,7 +121,7 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
             }
         }
         // map转为list
-        for(Map.Entry<Long, ITaskExecutionRunnable> entry : taskExecutionRunnableMap.entrySet()) {
+        for (Map.Entry<Long, ITaskExecutionRunnable> entry : taskExecutionRunnableMap.entrySet()) {
             taskExecutionRunnableList.add(entry.getValue());
         }
         try {
@@ -123,9 +129,12 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
             taskDispatcher.dispatchTasks(taskExecutionRunnableList);
         } catch (Exception e) {
             for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
-                long waitingTimeMills = Math.max(taskExecutionRunnable.getTaskExecutionContext().increaseDispatchFailTimes() * 1_000L, 60_000L);
-                globalTaskDispatchWaitingQueue.dispatchTaskExecuteRunnableWithDelay(taskExecutionRunnable, waitingTimeMills);
-                log.error("Dispatch Task: {} failed will retry after: {}/ms", taskExecutionRunnable.getTaskInstance().getName(), waitingTimeMills, e);
+                long waitingTimeMills = Math.max(
+                        taskExecutionRunnable.getTaskExecutionContext().increaseDispatchFailTimes() * 1_000L, 60_000L);
+                globalTaskDispatchWaitingQueue.dispatchTaskExecuteRunnableWithDelay(taskExecutionRunnable,
+                        waitingTimeMills);
+                log.error("Dispatch Task: {} failed will retry after: {}/ms",
+                        taskExecutionRunnable.getTaskInstance().getName(), waitingTimeMills, e);
             }
         }
     }
@@ -168,7 +177,7 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
     }
 
     public boolean isMultiDispatcher(String dispatchType) {
-        switch (dispatchType){
+        switch (dispatchType) {
             case "RANDOM":
                 return false;
             case "ROUND_ROBIN":

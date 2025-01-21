@@ -17,10 +17,10 @@
 
 package org.apache.dolphinscheduler.eventbus;
 
-import lombok.Data;
-
 import java.util.Optional;
 import java.util.concurrent.DelayQueue;
+
+import lombok.Data;
 
 /**
  * The event bus that supports delay event.

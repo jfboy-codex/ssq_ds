@@ -720,23 +720,23 @@ public class WorkflowDefinitionServiceImpl extends BaseServiceImpl implements Wo
     }
 
     // ssq 调度用
-//    public Map<String, Object> queryWorkflowDefinitionByCodeNoUser(long projectCode, long code) {
-//        // 直接检验成功
-//        Map<String, Object> result = new HashMap<>();
-//        result.put("msg", "success");
-//        result.put("status", Status.SUCCESS);
-//
-//        WorkflowDefinition workflowDefinition = workflowDefinitionMapper.queryByCode(code);
-//        if (workflowDefinition == null || projectCode != workflowDefinition.getProjectCode()) {
-//            log.error("workflow definition does not exist, workflowDefinitionCode:{}.", code);
-//            putMsg(result, Status.WORKFLOW_DEFINITION_NOT_EXIST, String.valueOf(code));
-//        } else {
-//            DagData dagData = processService.genDagData(workflowDefinition);
-//            result.put(Constants.DATA_LIST, dagData);
-//            putMsg(result, Status.SUCCESS);
-//        }
-//        return result;
-//    }
+    // public Map<String, Object> queryWorkflowDefinitionByCodeNoUser(long projectCode, long code) {
+    // // 直接检验成功
+    // Map<String, Object> result = new HashMap<>();
+    // result.put("msg", "success");
+    // result.put("status", Status.SUCCESS);
+    //
+    // WorkflowDefinition workflowDefinition = workflowDefinitionMapper.queryByCode(code);
+    // if (workflowDefinition == null || projectCode != workflowDefinition.getProjectCode()) {
+    // log.error("workflow definition does not exist, workflowDefinitionCode:{}.", code);
+    // putMsg(result, Status.WORKFLOW_DEFINITION_NOT_EXIST, String.valueOf(code));
+    // } else {
+    // DagData dagData = processService.genDagData(workflowDefinition);
+    // result.put(Constants.DATA_LIST, dagData);
+    // putMsg(result, Status.SUCCESS);
+    // }
+    // return result;
+    // }
 
     /**
      * query detail of workflow definition

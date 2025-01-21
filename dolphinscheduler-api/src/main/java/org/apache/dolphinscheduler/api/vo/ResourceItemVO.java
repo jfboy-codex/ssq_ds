@@ -22,7 +22,6 @@ import org.apache.dolphinscheduler.spi.enums.ResourceType;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -57,7 +56,7 @@ public class ResourceItemVO {
     public ResourceItemVO(StorageEntity storageEntity) {
         this.isDirectory = storageEntity.isDirectory();
         this.alias = storageEntity.getFileName();
-        this.userName = storageEntity.getUserName(); //ssq
+        this.userName = storageEntity.getUserName(); // ssq
         this.fileName = storageEntity.getFileName();
         this.fullName = storageEntity.getFullName();
         this.type = storageEntity.getType();
@@ -65,11 +64,11 @@ public class ResourceItemVO {
         this.createTime = storageEntity.getCreateTime();
         this.updateTime = storageEntity.getUpdateTime();
 
-//        if (isDirectory) {
-//            alias = StringUtils.removeEndIgnoreCase(alias, File.separator);
-//            fileName = StringUtils.removeEndIgnoreCase(fileName, File.separator);
-//            fullName = StringUtils.removeEndIgnoreCase(fullName, File.separator);
-//        }
+        // if (isDirectory) {
+        // alias = StringUtils.removeEndIgnoreCase(alias, File.separator);
+        // fileName = StringUtils.removeEndIgnoreCase(fileName, File.separator);
+        // fullName = StringUtils.removeEndIgnoreCase(fullName, File.separator);
+        // }
 
         // ssq
         if (isDirectory) {

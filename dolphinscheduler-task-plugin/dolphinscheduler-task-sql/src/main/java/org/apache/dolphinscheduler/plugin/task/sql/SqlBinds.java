@@ -18,7 +18,6 @@
 package org.apache.dolphinscheduler.plugin.task.sql;
 
 import org.apache.dolphinscheduler.plugin.task.api.model.Property;
-import org.springframework.beans.BeanUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class SqlBinds {
     public static SqlBinds getMiniSqlBinds(SqlBinds sqlBinds) {
         int miniSize = 200;
         String miniSql = sqlBinds.getSql();
-        if (sqlBinds.getSql()!=null && sqlBinds.getSql().length() > miniSize) {
+        if (sqlBinds.getSql() != null && sqlBinds.getSql().length() > miniSize) {
             String sql = sqlBinds.getSql();
             miniSql = sql.substring(0, miniSize) + "......" + sql.substring(sql.length() - 3);
         }
@@ -58,7 +57,7 @@ public class SqlBinds {
             Property property = entry.getValue();
             if (num < 10) {
                 miniParamsMap.put(key, property);
-                num ++;
+                num++;
             } else {
                 break;
             }

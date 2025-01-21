@@ -44,7 +44,6 @@ import org.apache.dolphinscheduler.plugin.task.api.TaskPluginManager;
 import org.apache.dolphinscheduler.plugin.task.api.enums.Direct;
 import org.apache.dolphinscheduler.plugin.task.api.enums.TaskExecutionStatus;
 import org.apache.dolphinscheduler.plugin.task.api.log.TaskInstanceLogHeader;
-import org.apache.dolphinscheduler.plugin.task.api.model.Property;
 import org.apache.dolphinscheduler.plugin.task.api.model.TaskAlertInfo;
 import org.apache.dolphinscheduler.plugin.task.api.resource.ResourceContext;
 import org.apache.dolphinscheduler.plugin.task.api.utils.LogUtils;
@@ -69,7 +68,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import org.springframework.beans.BeanUtils;
 
 public abstract class WorkerTaskExecutor implements Runnable {
 
@@ -201,7 +199,8 @@ public abstract class WorkerTaskExecutor implements Runnable {
         log.info("Set task appId: {}", taskAppId);
 
         // ssq 打印简易版
-        log.info("End initialize task {}", JSONUtils.toPrettyJsonString(TaskExecutionContext.getMiniTaskExecutionContext(taskExecutionContext)));
+        log.info("End initialize task {}",
+                JSONUtils.toPrettyJsonString(TaskExecutionContext.getMiniTaskExecutionContext(taskExecutionContext)));
     }
 
     protected void beforeExecute() {
@@ -244,7 +243,8 @@ public abstract class WorkerTaskExecutor implements Runnable {
         log.info("Success initialized task plugin instance successfully");
 
         task.getParameters().setVarPool(taskExecutionContext.getVarPool());
-        log.info("Set taskVarPool: {} successfully", TaskExecutionContext.getMiniTaskExecutionContext(taskExecutionContext).getVarPool()); // ssq
+        log.info("Set taskVarPool: {} successfully",
+                TaskExecutionContext.getMiniTaskExecutionContext(taskExecutionContext).getVarPool()); // ssq
 
     }
 

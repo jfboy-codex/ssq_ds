@@ -389,6 +389,11 @@
             <version>${truth.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.gurobi</groupId>
+            <artifactId>gurobi</artifactId>
+            <version>12.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

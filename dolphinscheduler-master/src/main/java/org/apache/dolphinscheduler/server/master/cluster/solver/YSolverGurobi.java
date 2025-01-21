@@ -1,16 +1,40 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.dolphinscheduler.server.master.cluster.solver;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.Table;
-import gurobi.*;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.dolphinscheduler.extract.base.utils.HostThread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.Table;
+import com.gurobi.gurobi.GRB;
+import com.gurobi.gurobi.GRBEnv;
+import com.gurobi.gurobi.GRBException;
+import com.gurobi.gurobi.GRBLinExpr;
+import com.gurobi.gurobi.GRBModel;
+import com.gurobi.gurobi.GRBVar;
 
 @Slf4j
 public class YSolverGurobi {
@@ -30,8 +54,8 @@ public class YSolverGurobi {
 
     Map<Long, HostThread> dataHostThreadMap = new HashMap<>(); // 存储数据放置位置的结果
 
-
-    public YSolverGurobi(BiMap<Integer, Long> dataBiMap, BiMap<Integer, HostThread> hostThreadBiMap, Table<Long, HostThread, Long> timeTable) {
+    public YSolverGurobi(BiMap<Integer, Long> dataBiMap, BiMap<Integer, HostThread> hostThreadBiMap,
+                         Table<Long, HostThread, Long> timeTable) {
         M = dataBiMap.size();
         J = hostThreadBiMap.size();
         this.dataBiMap = dataBiMap;
@@ -41,9 +65,9 @@ public class YSolverGurobi {
 
     public Map<Long, HostThread> solve() {
         try {
-            GRBEnv    env   = new GRBEnv();
+            GRBEnv env = new GRBEnv();
             env.set(GRB.IntParam.OutputFlag, 0);
-            GRBModel  model = new GRBModel(env);
+            GRBModel model = new GRBModel(env);
 
             List<GRBVar> xijVars = new ArrayList<>();
             GRBVar k = model.addVar(0, GRB.INFINITY, 0, GRB.CONTINUOUS, "k");
@@ -90,7 +114,7 @@ public class YSolverGurobi {
                 for (int m = 0; m < M; m++) {
                     for (int j = 0; j < J; j++) {
                         int x = (int) xijVars.get(m * J + j).get(GRB.DoubleAttr.X);
-                        if (x==1) {
+                        if (x == 1) {
                             dataHostThreadMap.put(dataBiMap.get(m), hostThreadBiMap.get(j));
                             break;
                         }
@@ -110,7 +134,7 @@ public class YSolverGurobi {
             return dataHostThreadMap;
 
         } catch (GRBException e) {
-            log.info("Error code: {} . {}",  e.getErrorCode(), e.getMessage());
+            log.info("Error code: {} . {}", e.getErrorCode(), e.getMessage());
             return dataHostThreadMap;
         }
     }
