@@ -46,9 +46,15 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
 
     private FlutterWorkerLoadBalancer flutterWorkerLoadBalancer;
 
+    private HungaryWorkerLoadBalancer hungaryWorkerLoadBalancer;
+
     private TaskDataScheduleWorkerLoadBalancer taskDataScheduleWorkerLoadBalancer;
 
     private OnLineTaskScheduleWorkerLoadBalancer onLineTaskScheduleWorkerLoadBalancer;
+
+    private BinaryHungaryDfsWorkerLoadBalancer binaryHungaryDfsWorkerLoadBalancer;
+
+    private BinaryHungaryBfsWorkerLoadBalancer binaryHungaryBfsWorkerLoadBalancer;
 
     public FreedomWorkerLoadBalancer(WorkerClusters workerClusters) {
         this.getAllWorkerLoadBalancer(workerClusters);
@@ -63,8 +69,11 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
         weightedRandomWorkerLoadBalancer = new WeightedRandomWorkerLoadBalancer(workerClusters);
         maxMinFairnessWorkerLoadBalancer = new MaxMinFairnessWorkerLoadBalancer(workerClusters);
         flutterWorkerLoadBalancer = new FlutterWorkerLoadBalancer(workerClusters);
+        hungaryWorkerLoadBalancer = new HungaryWorkerLoadBalancer(workerClusters);
         taskDataScheduleWorkerLoadBalancer = new TaskDataScheduleWorkerLoadBalancer(workerClusters);
         onLineTaskScheduleWorkerLoadBalancer = new OnLineTaskScheduleWorkerLoadBalancer(workerClusters);
+        binaryHungaryDfsWorkerLoadBalancer = new BinaryHungaryDfsWorkerLoadBalancer(workerClusters);
+        binaryHungaryBfsWorkerLoadBalancer = new BinaryHungaryBfsWorkerLoadBalancer(workerClusters);
     }
 
     @Override
@@ -76,10 +85,16 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
                 return maxMinFairnessWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             case "FLUTTER":
                 return flutterWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
+            case "HUNGARY":
+                return hungaryWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             case "TASK_DATA_SCHEDULE":
                 return taskDataScheduleWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             case "ON_LINE_TASK_SCHEDULE":
                 return onLineTaskScheduleWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
+            case "BINARY_HUNGARY_DFS":
+                return binaryHungaryDfsWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
+            case "BINARY_HUNGARY_BFS":
+                return binaryHungaryBfsWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             default:
                 throw new IllegalArgumentException("不支持调度策略 " + type);
         }

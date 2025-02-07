@@ -371,24 +371,19 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
     protected void setWaitTime(TasksExecutionRunnable tasksExecutionRunnable,
                                Map<Long, HostThread> tasksDispatchHostThread) {
         List<ITaskExecutionRunnable> taskExecutionRunnableList = tasksExecutionRunnable.getTaskExecutionRunnableList();
-        List<HostThreadStatus> hostThreadStatusList = tasksExecutionRunnable.getHostThreadStatusList();
-        Table<Host, Integer, Long> hostUsableTimeTable = HashBasedTable.create();
-        for (HostThreadStatus hostThreadStatus : hostThreadStatusList) {
-            hostUsableTimeTable.put(Host.of(hostThreadStatus.getHost()), hostThreadStatus.getThreadId(),
-                    hostThreadStatus.getUsableTime().getTime());
-        }
+        Table<Host, Integer, Long> hostUsableTimeTable = tasksExecutionRunnable.getHostUsableTimeTable();
         for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
             HostThread hostThread = tasksDispatchHostThread.get(taskInstance.getTaskCode());
             Host host = hostThread.getHost();
             int threadId = hostThread.getThreadId();
-            long usableTime = hostThreadStatusList.stream()
-                    .filter(v -> host.equals(Host.of(v.getHost())) && threadId == v.getThreadId())
-                    .map(v -> v.getUsableTime().getTime())
-                    .findFirst().get();
+            long usableTime = hostUsableTimeTable.get(host, threadId);
             long waitTime = usableTime - taskInstance.getSubmitTime().getTime();
-            if (waitTime < 0)
+            if (waitTime < 0) {
                 waitTime = 0;
+            }
+            // System.out.println("任务" + taskInstance.getName() + "放在" + host + "线程" + threadId + "的等待时间是：" + waitTime +
+            // " --- " + usableTime);
             taskInstance.setWaitTime(DateUtils.format2DurationMS(waitTime));
         }
     }

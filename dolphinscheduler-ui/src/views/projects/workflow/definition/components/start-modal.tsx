@@ -143,13 +143,25 @@ export default defineComponent({
         label: 'FLUTTER'
       },
       {
+        value: 'HUNGARY',
+        label: 'HUNGARY'
+      },
+      {
         value: 'TASK_DATA_SCHEDULE',
         label: 'TASK_DATA_SCHEDULE'
       },
       {
         value: 'ON_LINE_TASK_SCHEDULE',
         label: 'ON_LINE_TASK_SCHEDULE'
-      }
+      },
+      {
+        value: 'BINARY_HUNGARY_DFS',
+        label: 'BINARY_HUNGARY_DFS'
+      },
+      {
+        value: 'BINARY_HUNGARY_BFS',
+        label: 'BINARY_HUNGARY_BFS'
+      },
     ]
 
     const generalPriorityList = () => [

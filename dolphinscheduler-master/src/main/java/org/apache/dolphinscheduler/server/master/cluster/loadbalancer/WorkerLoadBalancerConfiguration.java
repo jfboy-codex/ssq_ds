@@ -49,6 +49,8 @@ public class WorkerLoadBalancerConfiguration {
                 return new MaxMinFairnessWorkerLoadBalancer(clusterManager.getWorkerClusters());
             case FLUTTER:
                 return new FlutterWorkerLoadBalancer(clusterManager.getWorkerClusters());
+            case HUNGARY:
+                return new HungaryWorkerLoadBalancer(clusterManager.getWorkerClusters());
             case TASK_DATA_SCHEDULER:
                 return new TaskDataScheduleWorkerLoadBalancer(clusterManager.getWorkerClusters());
             case ON_LINE_TASK_SCHEDULER:

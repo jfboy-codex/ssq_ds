@@ -113,10 +113,10 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
                 log.warn("The TaskInstance {} state is : {}, will not dispatch", taskInstance.getName(), status);
             } else {
                 long taskCode = taskExecutionRunnable.getTaskInstance().getTaskCode();
-                if (taskExecutionRunnableMap.get(taskCode) != null) {
-                    System.out.println("旧: " + taskExecutionRunnableMap.get(taskCode));
-                    System.out.println("新: " + taskExecutionRunnable);
-                }
+                // if (taskExecutionRunnableMap.get(taskCode) != null) {
+                // System.out.println("旧: " + taskExecutionRunnableMap.get(taskCode));
+                // System.out.println("新: " + taskExecutionRunnable);
+                // }
                 taskExecutionRunnableMap.put(taskCode, taskExecutionRunnable); // 加入map,防止出现重复的任务
             }
         }
@@ -192,10 +192,16 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
                 return true;
             case "FLUTTER":
                 return true;
+            case "HUNGARY":
+                return true;
             case "TASK_DATA_SCHEDULE":
                 return true;
             case "ON_LINE_TASK_SCHEDULE":
                 return false;
+            case "BINARY_HUNGARY_DFS":
+                return true;
+            case "BINARY_HUNGARY_BFS":
+                return true;
             default:
                 throw new IllegalArgumentException("不支持调度策略 " + dispatchType);
         }
