@@ -120,6 +120,10 @@ export default defineComponent({
                 {this.taskInstance.completionTime}
               </li>
               <li>
+                {"资源利用率"}:{' '}
+                {this.taskInstance.resourceUtilization}
+              </li>
+              <li>
                 {"输出数据"}:{' '}
                 {(new TextEncoder().encode(this.taskInstance.varPool).length*8)+"B"}
               </li>

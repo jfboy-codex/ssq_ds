@@ -169,6 +169,12 @@ export function useTable() {
         render: (_row: IWorkflowInstance) => _row.duration || '-'
       },
       {
+        title: "资源利用率",
+        key: 'resourceUtilization',
+        ...COLUMN_WIDTH_CONFIG['resourceUtilization'],
+        render: (_row: IWorkflowInstance) => _row.resourceUtilization || '-'
+      },
+      {
         title: t('project.workflow.run_times'),
         key: 'runTimes',
         ...COLUMN_WIDTH_CONFIG['times'],

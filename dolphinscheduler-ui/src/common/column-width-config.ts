@@ -101,8 +101,11 @@ export const COLUMN_WIDTH_CONFIG = {
   waitTime: {
     width: 140
   },
-  exeTime:{
+  exeTime: {
     width: 140
+  },
+  resourceUtilization: {
+    width: 100
   },
   dispatchTime: {
     width: 140

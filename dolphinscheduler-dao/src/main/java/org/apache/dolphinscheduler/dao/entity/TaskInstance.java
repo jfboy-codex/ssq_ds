@@ -164,6 +164,8 @@ public class TaskInstance implements Serializable {
 
     private String outResult;
 
+    private String resourceUtilization;
+
     public void init(String host, Date startTime, String executePath) {
         this.host = host;
         this.startTime = startTime;

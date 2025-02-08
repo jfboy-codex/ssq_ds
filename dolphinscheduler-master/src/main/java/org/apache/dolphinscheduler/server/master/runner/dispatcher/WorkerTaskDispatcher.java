@@ -181,6 +181,12 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             taskInstance.setTransferTime(DateUtils.format2DurationMS(transferTime)); // 设置传输时间
             long completionTime = Math.max(waitTime, transferTime) + exeTime;
             taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime)); // 设置完成时间
+            float ru = 0;
+            if (completionTime != 0) {
+                ru = (float) exeTime / completionTime * 100;
+            }
+            String resourceUtilization = String.format("%.2f", ru) + "%";
+            taskInstance.setResourceUtilization(resourceUtilization); // 设置资源利用率
             long dispatchEndTime = new Date().getTime();
             taskInstance.setDispatchTime(DateUtils.format2DurationMS(dispatchEndTime - dispatchStartTime));
 
@@ -427,7 +433,13 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             long transferTime = DateUtils.duration2MS(taskInstance.getTransferTime());
             long exeTime = DateUtils.duration2MS(taskInstance.getExeTime());
             long completionTime = Math.max(waitTime, transferTime) + exeTime;
+            float ru = 0;
+            if (completionTime != 0) {
+                ru = (float) exeTime / completionTime * 100;
+            }
+            String resourceUtilization = String.format("%.2f", ru) + "%";
             taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime));
+            taskInstance.setResourceUtilization(resourceUtilization);
         }
     }
 

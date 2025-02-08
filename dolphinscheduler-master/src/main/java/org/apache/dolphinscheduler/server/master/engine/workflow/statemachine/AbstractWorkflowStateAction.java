@@ -135,6 +135,20 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         triggerTasks(workflowExecutionRunnable, workflowExecutionGraph.getSuccessors(taskExecutionRunnable));
     }
 
+    protected String getResourceUtilization(final IWorkflowExecutionRunnable workflowExecutionRunnable) {
+        WorkflowInstance workflowInstance = workflowExecutionRunnable.getWorkflowInstance();
+        // 获取当前工作流实例关联的任务实例
+        List<TaskInstance> currentTaskInstanceList =
+                processService.findTaskInstanceByWorkflowInstanceId(workflowInstance.getId());
+        float ru = 0;
+        for (TaskInstance taskInstance : currentTaskInstanceList) {
+            String taskRU = taskInstance.getResourceUtilization();
+            ru += Float.parseFloat(taskRU.substring(0, taskRU.length() - 1));
+        }
+        ru /= currentTaskInstanceList.size();
+        return String.format("%.2f", ru) + "%";
+    }
+
     protected long getCompletionTime(final IWorkflowExecutionRunnable workflowExecutionRunnable) {
         WorkflowInstance workflowInstance = workflowExecutionRunnable.getWorkflowInstance();
         // 获取工作流定义的任务依赖关系
@@ -235,6 +249,7 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         workflowInstance.setEndTime(new Date());
         workflowInstance.setState(workflowExecutionStatus);
         workflowInstance.setCompletionTime(DateUtils.format2DurationMS(getCompletionTime(workflowExecutionRunnable)));
+        workflowInstance.setResourceUtilization(getResourceUtilization(workflowExecutionRunnable));
         transformWorkflowInstanceState(workflowExecutionRunnable, workflowExecutionStatus);
         workflowExecutionRunnable.getWorkflowEventBus()
                 .publish(WorkflowFinalizeLifecycleEvent.of(workflowExecutionRunnable));

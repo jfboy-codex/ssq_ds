@@ -218,9 +218,13 @@ public abstract class AbstractTaskStateAction implements ITaskStateAction {
         long duration = DateUtils.differMs(taskInstance.getStartTime(), taskInstance.getEndTime());
         taskInstance.setDuration(DateUtils.format2DurationMS(duration));
         if (Objects.equals(taskInstance.getExeTime(), "0")) { // 如果预测执行时间为0，则使用真实运行时间计算完成时间
-            long completionTime = DateUtils.duration2MS(taskInstance.getCompletionTime());
+            long time = DateUtils.duration2MS(taskInstance.getCompletionTime());
+            long completionTime = time + duration;
             taskInstance.setExeTime(DateUtils.format2DurationMS(duration));
-            taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime + duration));
+            taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime));
+            float ru = (float) duration / completionTime * 100;
+            String resourceUtilization = String.format("%.2f", ru) + "%";
+            taskInstance.setResourceUtilization(resourceUtilization);
         }
         log.info("间隔时间戳 {}", taskInstance.getEndTime().getTime() - taskInstance.getStartTime().getTime());
         taskInstance.setVarPool(taskSuccessEvent.getVarPool());

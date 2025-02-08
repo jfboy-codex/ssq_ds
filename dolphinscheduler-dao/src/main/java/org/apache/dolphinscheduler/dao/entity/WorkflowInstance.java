@@ -164,6 +164,8 @@ public class WorkflowInstance {
 
     private int testFlag;
 
+    private String resourceUtilization;
+
     /**
      * set the process name with process define version and timestamp
      *
