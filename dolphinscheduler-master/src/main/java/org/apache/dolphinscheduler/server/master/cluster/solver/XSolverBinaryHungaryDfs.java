@@ -46,16 +46,16 @@ public class XSolverBinaryHungaryDfs {
     Table<Long, HostThread, Long> timeTable; // 时间矩阵
 
     // 成本矩阵
-    private long[][] costMatrix;
+    private final long[][] costMatrix;
 
     // 二分图的邻接矩阵，graph[i][j] = 1 表示左边第 i 个顶点和右边第 j 个顶点之间有边相连
-    private int[][] graph;
+    private final int[][] graph;
 
     // 用于标记右边顶点集合中的顶点在一次深度优先搜索过程中是否已经被访问过
-    private boolean[] visited;
+    private final boolean[] visited;
 
     // 用于记录右边顶点集合中的每个顶点与左边顶点集合中的哪个顶点匹配，初始值 -1 表示未匹配
-    private int[] match;
+    private final int[] match;
 
     @Getter
     long optimalTime = 0; // 最优完成时间

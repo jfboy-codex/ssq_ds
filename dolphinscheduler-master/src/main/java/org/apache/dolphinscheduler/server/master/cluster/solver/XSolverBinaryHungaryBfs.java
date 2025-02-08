@@ -48,19 +48,19 @@ public class XSolverBinaryHungaryBfs {
     Table<Long, HostThread, Long> timeTable; // 时间矩阵
 
     // 成本矩阵
-    private long[][] costMatrix;
+    private final long[][] costMatrix;
 
     // 二分图的邻接矩阵，graph[i][j] = 1 表示左边第 i 个顶点和右边第 j 个顶点之间有边相连
-    private int[][] graph;
+    private final int[][] graph;
 
     // 记录左边顶点的匹配情况，matchLeft[i] 表示左边第 i 个顶点匹配的右边顶点编号，-1 表示未匹配
-    private int[] matchLeft;
+    private final int[] matchLeft;
 
     // 记录右边顶点的匹配情况，matchRight[j] 表示右边第 j 个顶点匹配的左边顶点编号，-1 表示未匹配
-    private int[] matchRight;
+    private final int[] matchRight;
 
     // 记录路径上每个顶点的前驱，用于回溯增广路径
-    private int[] pre;
+    private final int[] pre;
 
     @Getter
     long optimalTime = 0; // 最优完成时间

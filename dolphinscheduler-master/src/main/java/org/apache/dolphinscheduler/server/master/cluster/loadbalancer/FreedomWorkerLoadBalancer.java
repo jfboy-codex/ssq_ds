@@ -56,6 +56,8 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
 
     private BinaryHungaryBfsWorkerLoadBalancer binaryHungaryBfsWorkerLoadBalancer;
 
+    private BinaryHungaryGreedyWorkerLoadBalancer binaryHungaryGreedyWorkerLoadBalancer;
+
     public FreedomWorkerLoadBalancer(WorkerClusters workerClusters) {
         this.getAllWorkerLoadBalancer(workerClusters);
     }
@@ -74,6 +76,7 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
         onLineTaskScheduleWorkerLoadBalancer = new OnLineTaskScheduleWorkerLoadBalancer(workerClusters);
         binaryHungaryDfsWorkerLoadBalancer = new BinaryHungaryDfsWorkerLoadBalancer(workerClusters);
         binaryHungaryBfsWorkerLoadBalancer = new BinaryHungaryBfsWorkerLoadBalancer(workerClusters);
+        binaryHungaryGreedyWorkerLoadBalancer = new BinaryHungaryGreedyWorkerLoadBalancer(workerClusters);
     }
 
     @Override
@@ -95,6 +98,8 @@ public class FreedomWorkerLoadBalancer implements IWorkerLoadBalancer {
                 return binaryHungaryDfsWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             case "BINARY_HUNGARY_BFS":
                 return binaryHungaryBfsWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
+            case "BINARY_HUNGARY_GREEDY":
+                return binaryHungaryGreedyWorkerLoadBalancer.select(workerGroup, tasksExecutionRunnable);
             default:
                 throw new IllegalArgumentException("不支持调度策略 " + type);
         }

@@ -162,6 +162,10 @@ export default defineComponent({
         value: 'BINARY_HUNGARY_BFS',
         label: 'BINARY_HUNGARY_BFS'
       },
+      {
+        value: 'BINARY_HUNGARY_GREEDY',
+        label: 'BINARY_HUNGARY_GREEDY'
+      },
     ]
 
     const generalPriorityList = () => [

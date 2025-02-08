@@ -55,6 +55,10 @@ public class WorkerLoadBalancerConfiguration {
                 return new TaskDataScheduleWorkerLoadBalancer(clusterManager.getWorkerClusters());
             case ON_LINE_TASK_SCHEDULER:
                 return new OnLineTaskScheduleWorkerLoadBalancer(clusterManager.getWorkerClusters());
+            case BINARY_HUNGARY_DFS:
+                return new BinaryHungaryDfsWorkerLoadBalancer(clusterManager.getWorkerClusters());
+            case BINARY_HUNGARY_BFS:
+                return new BinaryHungaryBfsWorkerLoadBalancer(clusterManager.getWorkerClusters());
             default:
                 throw new IllegalArgumentException(
                         "unSupport worker load balancer type " + workerLoadBalancerConfigurationProperties.getType());

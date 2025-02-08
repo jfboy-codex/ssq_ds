@@ -45,7 +45,7 @@ public class XSolverHungary {
     Table<Long, HostThread, Long> timeTable; // 时间矩阵
 
     @Getter
-    long optimalTime = Long.MAX_VALUE; // 最优完成时间
+    long optimalTime = 0; // 最优完成时间
 
     Map<Long, HostThread> taskHostThreadMap = new HashMap<>(); // 存储任务放置位置的结果
 
@@ -85,7 +85,7 @@ public class XSolverHungary {
                 long taskCode = taskBiMap.get(markedZero[0]);
                 HostThread hostThread = hostThreadBiMap.get(markedZero[1]);
                 long time = timeTable.get(taskCode, hostThread);
-                if (time < optimalTime) {
+                if (time > optimalTime) {
                     optimalTime = time;
                 }
                 taskHostThreadMap.put(taskCode, hostThread);

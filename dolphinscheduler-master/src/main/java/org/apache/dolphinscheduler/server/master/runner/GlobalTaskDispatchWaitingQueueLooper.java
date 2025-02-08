@@ -202,6 +202,8 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
                 return true;
             case "BINARY_HUNGARY_BFS":
                 return true;
+            case "BINARY_HUNGARY_GREEDY":
+                return true;
             default:
                 throw new IllegalArgumentException("不支持调度策略 " + dispatchType);
         }
