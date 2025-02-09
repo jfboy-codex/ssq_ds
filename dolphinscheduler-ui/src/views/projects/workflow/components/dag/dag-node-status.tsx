@@ -124,7 +124,11 @@ export default defineComponent({
                 {this.taskInstance.resourceUtilization}
               </li>
               <li>
-                {"输出数据"}:{' '}
+                {"接收数据量"}:{' '}
+                {this.taskInstance.receiveDataSize}
+              </li>
+              <li>
+                {"输出数据量"}:{' '}
                 {(new TextEncoder().encode(this.taskInstance.varPool).length*8)+"B"}
               </li>
               <li>

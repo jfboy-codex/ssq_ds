@@ -175,10 +175,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
 
             // 更新任务实例相关字段信息
             taskInstance.setThreadId(optionalHostThread.get().getThreadId()); // 设置线程ID
-            long waitTime = getWaitTime(ITaskExecutionRunnable, optionalHostThread);
-            taskInstance.setWaitTime(DateUtils.format2DurationMS(waitTime)); // 设置等待时间
-            long transferTime = getTransferTime(ITaskExecutionRunnable, optionalHostThread);
-            taskInstance.setTransferTime(DateUtils.format2DurationMS(transferTime)); // 设置传输时间
+            long waitTime = setWaitTime(ITaskExecutionRunnable, optionalHostThread); // 设置等待时间
+            long transferTime = setTaskTransferTime(ITaskExecutionRunnable, optionalHostThread); // 设置传输时间
             long completionTime = Math.max(waitTime, transferTime) + exeTime;
             taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime)); // 设置完成时间
             float ru = 0;
@@ -402,6 +400,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         Map<Long, HostThread> dataHostThreadMap = tasksExecutionRunnable.getDataHostThreadMap();
         for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             long transferTime = 0;
+            long receiveDataSize = 0;
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
             HostThread hostThread = tasksDispatchHostThread.get(taskInstance.getTaskCode());
             Host taskHost = hostThread.getHost();
@@ -419,9 +418,13 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
                     if (localTransferTime >= transferTime) {
                         transferTime = localTransferTime;
                     }
+                    if (!dataHost.getAddress().equals(taskHost.getAddress())) {
+                        receiveDataSize += dataSize;
+                    }
                 }
             }
             taskInstance.setTransferTime(DateUtils.format2DurationMS(transferTime));
+            taskInstance.setReceiveDataSize(receiveDataSize + "B");
         }
     }
 
@@ -491,9 +494,11 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         return hostDataMap;
     }
 
-    protected long getTransferTime(ITaskExecutionRunnable ITaskExecutionRunnable,
-                                   Optional<HostThread> optionalHostThread) {
+    protected long setTaskTransferTime(ITaskExecutionRunnable ITaskExecutionRunnable,
+                                       Optional<HostThread> optionalHostThread) {
+        TaskInstance taskInstance = ITaskExecutionRunnable.getTaskInstance();
         long transferTime = 0;
+        long receiveDataSize = 0;
         Map<Host, Long> hostDataMap = ITaskExecutionRunnable.getTaskNeedHostData();
         for (Map.Entry<Host, Long> entry : hostDataMap.entrySet()) {
             String preHost = entry.getKey().getAddress();
@@ -502,15 +507,21 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
                     .filter(v -> preHost.equals(v.getPreHost()) && postHost.equals(v.getPostHost()))
                     .map(Bandwidth::getBandwidth)
                     .findFirst().get();
-            long localTransferTime = (long) (entry.getValue() * 1000 / bandwidth); // 单位ms
+            long dataSize = entry.getValue();
+            long localTransferTime = (long) (dataSize * 1000 / bandwidth); // 单位ms
             if (localTransferTime >= transferTime) {
                 transferTime = localTransferTime;
             }
+            if (!preHost.equals(postHost)) {
+                receiveDataSize += dataSize;
+            }
         }
+        taskInstance.setTransferTime(DateUtils.format2DurationMS(transferTime));
+        taskInstance.setReceiveDataSize(receiveDataSize + "B");
         return transferTime;
     }
 
-    protected long getWaitTime(ITaskExecutionRunnable ITaskExecutionRunnable, Optional<HostThread> optionalHostThread) {
+    protected long setWaitTime(ITaskExecutionRunnable ITaskExecutionRunnable, Optional<HostThread> optionalHostThread) {
         TaskInstance taskInstance = ITaskExecutionRunnable.getTaskInstance();
         HostThread hostThread = optionalHostThread.get();
 
@@ -526,8 +537,10 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
                 .map(v -> v.getUsableTime().getTime())
                 .findFirst().get();
         long waitTime = usableTime - taskInstance.getSubmitTime().getTime();
-        if (waitTime < 0)
+        if (waitTime < 0) {
             waitTime = 0;
+        }
+        taskInstance.setWaitTime(DateUtils.format2DurationMS(waitTime));
         return waitTime;
     }
 

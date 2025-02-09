@@ -215,7 +215,13 @@ public abstract class AbstractTaskStateAction implements ITaskStateAction {
         final TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
         taskInstance.setState(TaskExecutionStatus.SUCCESS);
         taskInstance.setEndTime(taskSuccessEvent.getEndTime());
-        long duration = DateUtils.differMs(taskInstance.getStartTime(), taskInstance.getEndTime());
+        long duration = 0;
+        if (taskInstance.getStartTime() == null) {
+            duration = DateUtils.duration2MS(taskInstance.getCompletionTime());
+            log.error("网络问题导致worker无法发送相关信息（如任务开始时间）给master！！！");
+        } else {
+            duration = DateUtils.differMs(taskInstance.getStartTime(), taskInstance.getEndTime());
+        }
         taskInstance.setDuration(DateUtils.format2DurationMS(duration));
         if (Objects.equals(taskInstance.getExeTime(), "0")) { // 如果预测执行时间为0，则使用真实运行时间计算完成时间
             long time = DateUtils.duration2MS(taskInstance.getCompletionTime());
@@ -226,7 +232,6 @@ public abstract class AbstractTaskStateAction implements ITaskStateAction {
             String resourceUtilization = String.format("%.2f", ru) + "%";
             taskInstance.setResourceUtilization(resourceUtilization);
         }
-        log.info("间隔时间戳 {}", taskInstance.getEndTime().getTime() - taskInstance.getStartTime().getTime());
         taskInstance.setVarPool(taskSuccessEvent.getVarPool());
         taskInstance.setOutResult(taskSuccessEvent.getOutResult());
         taskInstanceDao.updateById(taskInstance);

@@ -175,6 +175,12 @@ export function useTable() {
         render: (_row: IWorkflowInstance) => _row.resourceUtilization || '-'
       },
       {
+        title: "传输数据量",
+        key: 'transferDataSize',
+        ...COLUMN_WIDTH_CONFIG['transferDataSize'],
+        render: (_row: IWorkflowInstance) => _row.transferDataSize || '-'
+      },
+      {
         title: t('project.workflow.run_times'),
         key: 'runTimes',
         ...COLUMN_WIDTH_CONFIG['times'],

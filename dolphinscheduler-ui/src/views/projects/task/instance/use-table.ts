@@ -204,7 +204,13 @@ export function useTable() {
         render: (row: IRecord) => row.dataHost || '-'
       },
       {
-        title: "生成数据量",
+        title: "接收数据量",
+        key: 'receiveDataSize',
+        ...COLUMN_WIDTH_CONFIG['receiveDataSize'],
+        render: (row: any) => row.receiveDataSize || '-'
+      },
+      {
+        title: "输出数据量",
         key: 'dataSize',
         ...COLUMN_WIDTH_CONFIG['dataSize'],
         render: (row: any) => (new TextEncoder().encode(row.varPool).length*8)+"B" || '-'

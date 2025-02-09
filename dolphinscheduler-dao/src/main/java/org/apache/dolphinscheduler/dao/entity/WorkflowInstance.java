@@ -164,6 +164,8 @@ public class WorkflowInstance {
 
     private int testFlag;
 
+    private String transferDataSize;
+
     private String resourceUtilization;
 
     /**

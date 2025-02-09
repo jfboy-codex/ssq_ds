@@ -73,8 +73,10 @@ public class XSolverHungary {
         }
         int[][] coverMatrix = new int[J][J]; // 全0矩阵
         List<int[]> markedZeros = new ArrayList<>();
+        printMatrix(costMatrix);
         reduceRows(costMatrix);
         reduceColumns(costMatrix);
+        printMatrix(costMatrix);
         boolean flag = coverZeros(costMatrix, coverMatrix, markedZeros);
         while (!flag) {
             adjustMatrix(costMatrix, markedZeros);
@@ -189,7 +191,6 @@ public class XSolverHungary {
             }
         }
         if (noLinedElements.isEmpty()) {
-            printMatrix(costMatrix);
             log.error("所有数都被划过！");
         }
         long miniK = Collections.min(noLinedElements);
@@ -207,14 +208,23 @@ public class XSolverHungary {
     public static void tickLine(long[][] costMatrix, List<int[]> markedZeros, List<Integer> tickedRow,
                                 List<Integer> tickedColumn) {
         boolean tickEd = true;
-        for (int row = 0; row < costMatrix.length; row++) {
-            tickedRow.add(row);
-            for (int[] mark : markedZeros) {
-                if (mark[0] == row) {
-                    tickedRow.remove(Integer.valueOf(row));
-                    break;
-                }
-            }
+        System.out.println("************");
+        printMatrix(costMatrix);
+        System.out.println("独立零元素");
+        for (int[] markedZero : markedZeros) {
+            System.out.print(markedZero[0] + "," + markedZero[1] + "   ");
+        }
+        System.out.println();
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < costMatrix.length; i++) {
+            list.add(i);
+        }
+        for (int[] mark : markedZeros) {
+            list.remove(Integer.valueOf(mark[0]));
+        }
+        for (Integer i : list) {
+            tickedRow.add(i);
+            System.out.println("打勾行增加：" + i);
         }
         while (tickEd) {
             tickEd = false;
@@ -223,6 +233,7 @@ public class XSolverHungary {
                     if (costMatrix[row][col] == 0) {
                         if (!tickedColumn.contains(col)) {
                             tickedColumn.add(col);
+                            System.out.println("打勾列增加：" + col);
                             tickEd = true;
                         }
                     }
@@ -235,6 +246,7 @@ public class XSolverHungary {
                             if (mark[0] == row && mark[1] == col) {
                                 if (!tickedRow.contains(row)) {
                                     tickedRow.add(row);
+                                    System.out.println("打勾行增加：" + row);
                                     tickEd = true;
                                 }
                             }
@@ -243,6 +255,17 @@ public class XSolverHungary {
                 }
             }
         }
+        System.out.println("最终打勾行为：");
+        for (Integer row : tickedRow) {
+            System.out.print(row + " ");
+        }
+        System.out.println();
+        System.out.println("最终打勾列为：");
+        for (Integer col : tickedColumn) {
+            System.out.print(col + " ");
+        }
+        System.out.println();
+        System.out.println("************");
     }
 
     public static boolean isCoveredAllZero(long[][] costMatrix, int[][] coverMatrix) {
@@ -258,6 +281,7 @@ public class XSolverHungary {
 
     // 打印矩阵
     public static void printMatrix(long[][] matrix) {
+        System.out.println("成本矩阵：");
         for (long[] row : matrix) {
             for (long value : row) {
                 System.out.print(value + " ");

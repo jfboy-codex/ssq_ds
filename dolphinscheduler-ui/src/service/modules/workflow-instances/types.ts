@@ -104,6 +104,7 @@ interface IWorkflowInstance {
   disabled?: boolean
   buttonType?: string
   testFlag: number
+  transferDataSize: string
   resourceUtilization: string
 }
 

@@ -107,6 +107,12 @@ export const COLUMN_WIDTH_CONFIG = {
   resourceUtilization: {
     width: 100
   },
+  receiveDataSize: {
+    width: 140
+  },
+  transferDataSize: {
+    width: 140
+  },
   dispatchTime: {
     width: 140
   },
