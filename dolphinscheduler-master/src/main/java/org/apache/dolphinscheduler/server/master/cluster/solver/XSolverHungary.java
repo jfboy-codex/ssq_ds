@@ -80,6 +80,8 @@ public class XSolverHungary {
         boolean flag = coverZeros(costMatrix, coverMatrix, markedZeros);
         while (!flag) {
             adjustMatrix(costMatrix, markedZeros);
+            coverMatrix = new int[J][J];
+            markedZeros = new ArrayList<>();
             flag = coverZeros(costMatrix, coverMatrix, markedZeros);
         }
         for (int[] markedZero : markedZeros) {
@@ -144,6 +146,7 @@ public class XSolverHungary {
         for (int i = 0; i < costMatrix.length; i++) {
             int zeroNum = 0;
             int firstZeroIndex = -1;
+            // 获取每行的为划过的0的数量，并标记第一个
             for (int j = 0; j < costMatrix[i].length; j++) {
                 // 未被划掉的0的数量
                 if (costMatrix[i][j] == 0 && coverMatrix[i][j] == 0) {
@@ -153,6 +156,7 @@ public class XSolverHungary {
                     zeroNum++;
                 }
             }
+            // 选择最少数量的行的第一个0为独立0元素
             if (zeroNum != 0 && zeroNum < minRowZeroNum) {
                 minRowZeroNum = zeroNum;
                 coverRow = i;
