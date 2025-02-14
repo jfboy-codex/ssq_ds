@@ -50,7 +50,8 @@ export const useForm = () => {
     selfFormRef: ref(), // 表单引用
     selfForm: {
       type: 'SQL', // 任务类型
-      num: 10 // 任务数量
+      label: 'NoEdge', // 工作流标签
+      num: 20 // 任务数量
     },
     saving: false, // 保存状态
     selfRules: {
@@ -63,18 +64,24 @@ export const useForm = () => {
           }
         }
       },
+      label: {
+        required: true, // 必填
+        trigger: ['input', 'blur'], // 触发验证的时机
+        validator() {
+          if (selfState.selfForm.label === '') {
+            return new Error('任务类型为空'); // 国际化提示
+          }
+        }
+      },
       num: {
         required: true, // 必填
         trigger: ['input', 'blur'], // 触发验证的时机
         validator() {
-          if (selfState.selfForm.num === '') {
-            return new Error('任务数为空'); // 国际化提示
-          }
           if (isNaN(Number(selfState.selfForm.num))) {
             return new Error('任务数必须是数字'); // 数量必须是数字
           }
-          if (Number(selfState.selfForm.num) <= 0) {
-            return new Error('任务数必须大于0'); // 数量必须大于 0
+          if (Number(selfState.selfForm.num) < 20) {
+            return new Error('任务数必须不小于20'); // 数量必须大于20
           }
         }
       }

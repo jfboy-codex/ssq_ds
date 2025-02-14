@@ -90,11 +90,12 @@ export function useModal(
   }
 
   const resetSelfForm = () => {
-    state.selfForm.type = ''
+    state.selfForm.type = 'SQL'
+    state.selfForm.label = ''
     state.selfForm.num = ''
   }
 
-  const handleSelfImportDefinition = async (type:string, num:number) => {
+  const handleSelfImportDefinition = async (type:string, label:string, num:number) => {
     await state.selfFormRef.validate()
     if (state.saving) return
     state.saving = true
@@ -102,9 +103,10 @@ export function useModal(
       const fileName = 'workflow_' + new Date().getTime()
       const data = {
         type,
+        label,
         num
       }
-      const projectCode = 132853726992032
+      const projectCode = Number(router.currentRoute.value.params.projectCode)
       await batchSelfExport(data, projectCode).then((res: any) => {
         downloadBlob(res, fileName)
       })

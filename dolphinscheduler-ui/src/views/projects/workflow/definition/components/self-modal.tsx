@@ -20,7 +20,7 @@ import { useI18n } from 'vue-i18n'
 import Modal from '@/components/modal'
 import { useForm } from './use-form'
 import { useModal } from './use-modal'
-import { NForm, NFormItem, NButton, NUpload, NIcon, NInput } from 'naive-ui'
+import { NForm, NFormItem, NSelect, NInput, NGradientText } from 'naive-ui'
 import { CloudUploadOutlined } from '@vicons/antd'
 
 const props = {
@@ -40,18 +40,37 @@ export default defineComponent({
     const hideModal = () => {
       ctx.emit('update:show')
     }
-    selfState.selfForm.type = 'SQL'
+    
     const handleSelfImport = () => {
-      handleSelfImportDefinition(selfState.selfForm.type, selfState.selfForm.num)
+      handleSelfImportDefinition(selfState.selfForm.type, selfState.selfForm.label, selfState.selfForm.num)
     }
 
     const trim = getCurrentInstance()?.appContext.config.globalProperties.trim
+    const labelOptions = [
+      {
+        label: 'NoEdge',
+        value: 'NoEdge',
+      },
+      {
+        label: 'Montage',
+        value: 'Montage',
+      },
+      {
+        label: 'SyberShake',
+        value: 'SyberShake',
+      },
+      {
+        label: 'LIGO',
+        value: 'LIGO',
+      }
+    ]
 
     return {
       hideModal,
       handleSelfImport,
       ...toRefs(selfState),
-      trim
+      trim,
+      labelOptions
     }
   },
 
@@ -61,7 +80,7 @@ export default defineComponent({
     return (
       <Modal
         show={this.$props.show}
-        title={'自定义导出工作流'}
+        title={'自定义工作流'}
         onCancel={this.hideModal} // 取消
         onConfirm={this.handleSelfImport} // 确认
         confirmLoading={this.saving}
@@ -77,6 +96,21 @@ export default defineComponent({
           </NFormItem>
         </NForm>
         <NForm rules={this.selfRules} ref='selfFormRef'>
+          <NFormItem label={'工作流标签'} path='label'>
+            <NSelect
+              allowInput={this.trim}
+              v-model={[this.selfForm.label, 'value']}
+              options={this.labelOptions}
+              placeholder=""
+            />
+            {/* <NInput
+              allowInput={this.trim}
+              v-model={[this.selfForm.label, 'value']}
+              placeholder={''}
+            /> */}
+          </NFormItem>
+        </NForm>
+        <NForm rules={this.selfRules} ref='selfFormRef'>
           <NFormItem label={'任务数量'} path='num'>
             <NInput
               allowInput={this.trim}
@@ -85,6 +119,9 @@ export default defineComponent({
             />
           </NFormItem>
         </NForm>
+        <NGradientText style="font-size: 12px; color: #888;">
+          由于不同工作流结构不同，实际任务数有偏差
+        </NGradientText>
       </Modal>
     )
   }

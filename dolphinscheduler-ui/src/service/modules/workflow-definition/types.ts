@@ -23,8 +23,9 @@ interface CodesReq {
   codes: string
 }
 
-interface TypeNumReq {
+interface SelfWorkflowReq {
   type: string
+  label: string
   num: number
 }
 
@@ -83,7 +84,7 @@ interface SimpleListRes {
 export {
   CodeReq,
   CodesReq,
-  TypeNumReq,
+  SelfWorkflowReq,
   FileReq,
   NameReq,
   ReleaseStateReq,

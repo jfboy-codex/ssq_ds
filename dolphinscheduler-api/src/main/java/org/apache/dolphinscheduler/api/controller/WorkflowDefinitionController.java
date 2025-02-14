@@ -693,10 +693,11 @@ public class WorkflowDefinitionController extends BaseController {
     public void batchSelfExportWorkflowDefinition(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
                                                   @Parameter(name = "projectCode", description = "PROJECT_CODE", required = true) @PathVariable long projectCode,
                                                   @RequestParam("type") String type,
+                                                  @RequestParam("label") String label,
                                                   @RequestParam("num") int num,
                                                   HttpServletResponse response) {
         try {
-            workflowDefinitionService.batchSelfExportWorkflowDefinition(loginUser, projectCode, type, num, response);
+            workflowDefinitionService.batchSelfExportWorkflowDefinition(loginUser, projectCode, type, label, num, response);
         } catch (Exception e) {
             log.error(Status.BATCH_EXPORT_WORKFLOW_DEFINE_BY_IDS_ERROR.getMsg(), e);
         }

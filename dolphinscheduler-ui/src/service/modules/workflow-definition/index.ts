@@ -26,7 +26,7 @@ import {
   ListReq,
   WorkflowDefinitionReq,
   TargetCodeReq,
-  TypeNumReq
+  SelfWorkflowReq
 } from './types'
 
 export function queryListPaging(params: PageReq & ListReq, code: number): any {
@@ -74,7 +74,7 @@ export function batchDeleteByCodes(data: CodesReq, code: number): any {
   })
 }
 
-export function batchSelfExport(data: TypeNumReq, code: number): any {
+export function batchSelfExport(data: SelfWorkflowReq, code: number): any {
   return axios({
     url: `/projects/${code}/workflow-definition/batch-self-export`,
     method: 'post',

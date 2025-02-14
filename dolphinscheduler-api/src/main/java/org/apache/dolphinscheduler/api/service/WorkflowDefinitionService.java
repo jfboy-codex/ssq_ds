@@ -271,6 +271,7 @@ public interface WorkflowDefinitionService {
     void batchSelfExportWorkflowDefinition(User loginUser,
                                            long projectCode,
                                            String type,
+                                           String label,
                                            int num,
                                            HttpServletResponse response);
 
