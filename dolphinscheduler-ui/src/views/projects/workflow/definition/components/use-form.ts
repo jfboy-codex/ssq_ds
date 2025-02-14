@@ -46,6 +46,41 @@ export const useForm = () => {
     } as FormRules
   })
 
+  const selfState = reactive({
+    selfFormRef: ref(), // 表单引用
+    selfForm: {
+      type: 'SQL', // 任务类型
+      num: 10 // 任务数量
+    },
+    saving: false, // 保存状态
+    selfRules: {
+      type: {
+        required: true, // 必填
+        trigger: ['input', 'blur'], // 触发验证的时机
+        validator() {
+          if (selfState.selfForm.type === '') {
+            return new Error('任务类型为空'); // 国际化提示
+          }
+        }
+      },
+      num: {
+        required: true, // 必填
+        trigger: ['input', 'blur'], // 触发验证的时机
+        validator() {
+          if (selfState.selfForm.num === '') {
+            return new Error('任务数为空'); // 国际化提示
+          }
+          if (isNaN(Number(selfState.selfForm.num))) {
+            return new Error('任务数必须是数字'); // 数量必须是数字
+          }
+          if (Number(selfState.selfForm.num) <= 0) {
+            return new Error('任务数必须大于0'); // 数量必须大于 0
+          }
+        }
+      }
+    } as FormRules // 表单验证规则
+  })
+
   const startState = reactive({
     startFormRef: ref(),
     startForm: {
@@ -161,6 +196,7 @@ export const useForm = () => {
 
   return {
     importState,
+    selfState,
     startState,
     timingState,
     copyState

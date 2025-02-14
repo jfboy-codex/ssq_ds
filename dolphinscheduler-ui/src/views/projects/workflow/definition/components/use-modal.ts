@@ -23,6 +23,8 @@ import type { Router } from 'vue-router'
 import { format } from 'date-fns'
 import {
   batchCopyByCodes,
+  batchExportByCodes,
+  batchSelfExport,
   importWorkflowDefinition,
   queryWorkflowDefinitionByCode
 } from '@/service/modules/workflow-definition'
@@ -62,6 +64,60 @@ export function useModal(
     [key: string]: { prop: string; value: string }[]
   }
 
+  const downloadBlob = (data: any, fileNameS = 'json') => {
+    if (!data) {
+      return
+    }
+    const blob = new Blob([data])
+    const fileName = `${fileNameS}.json`
+    if ('download' in document.createElement('a')) {
+      // Not IE
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.style.display = 'none'
+      link.href = url
+      link.setAttribute('download', fileName)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link) // remove element after downloading is complete.
+      window.URL.revokeObjectURL(url) // release blob object
+    } else {
+      // IE 10+
+      if (window.navigator.msSaveBlob) {
+        window.navigator.msSaveBlob(blob, fileName)
+      }
+    }
+  }
+
+  const resetSelfForm = () => {
+    state.selfForm.type = ''
+    state.selfForm.num = ''
+  }
+
+  const handleSelfImportDefinition = async (type:string, num:number) => {
+    await state.selfFormRef.validate()
+    if (state.saving) return
+    state.saving = true
+    try {
+      const fileName = 'workflow_' + new Date().getTime()
+      const data = {
+        type,
+        num
+      }
+      const projectCode = 132853726992032
+      await batchSelfExport(data, projectCode).then((res: any) => {
+        downloadBlob(res, fileName)
+      })
+      window.$message.success(t('project.workflow.success'))
+      state.saving = false
+      ctx.emit('updateList')
+      ctx.emit('update:show')
+      resetSelfForm()
+    } catch (err) {
+      state.saving = false
+    }
+  }
+
   const resetImportForm = () => {
     state.importForm.name = ''
     state.importForm.file = ''
@@ -69,7 +125,7 @@ export function useModal(
 
   const handleImportDefinition = async () => {
     await state.importFormRef.validate()
-
+    console.log('import')
     if (state.saving) return
     state.saving = true
     try {
@@ -300,6 +356,7 @@ export function useModal(
 
   return {
     variables,
+    handleSelfImportDefinition,
     handleImportDefinition,
     handleStartDefinition,
     handleCreateTiming,

@@ -23,6 +23,11 @@ interface CodesReq {
   codes: string
 }
 
+interface TypeNumReq {
+  type: string
+  num: number
+}
+
 interface FileReq {
   file: any
 }
@@ -78,6 +83,7 @@ interface SimpleListRes {
 export {
   CodeReq,
   CodesReq,
+  TypeNumReq,
   FileReq,
   NameReq,
   ReleaseStateReq,

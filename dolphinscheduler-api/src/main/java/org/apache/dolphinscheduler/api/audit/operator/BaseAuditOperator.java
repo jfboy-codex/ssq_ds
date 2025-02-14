@@ -82,8 +82,10 @@ public abstract class BaseAuditOperator implements AuditOperator {
         modifyRequestParams(paramNameArr, paramsMap, auditLogList);
         setObjectByParam(paramNameArr, paramsMap, auditLogList);
 
-        if (auditLogList.get(0).getModelId() == null) {
-            auditLogList.get(0).setModelId(OperatorUtils.getObjectIdentityByParam(paramNameArr, paramsMap));
+        if (!auditLogList.isEmpty()) {
+            if (auditLogList.get(0).getModelId() == null) {
+                auditLogList.get(0).setModelId(OperatorUtils.getObjectIdentityByParam(paramNameArr, paramsMap));
+            }
         }
     }
 

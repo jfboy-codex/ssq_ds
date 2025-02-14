@@ -39,6 +39,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUISettingStore } from '@/store/ui-setting/ui-setting'
 import Card from '@/components/card'
 import ImportModal from './components/import-modal'
+import SelfModal from './components/self-modal'
 import StartModal from './components/start-modal'
 import TimingModal from './components/timing-modal'
 import VersionModal from './components/version-modal'
@@ -183,6 +184,14 @@ export default defineComponent({
               >
                 {t('project.workflow.import_workflow')}
               </NButton>
+              <NButton
+                strong
+                secondary
+                size='small'
+                onClick={() => (this.selfShowRef = true)}
+              >
+                {'自定义导出工作流'}
+              </NButton>
             </NSpace>
             <NSpace>
               <Search
@@ -288,6 +297,10 @@ export default defineComponent({
         </Card>
         <ImportModal
           v-model:show={this.showRef}
+          onUpdateList={this.handleUpdateList}
+        />
+        <SelfModal
+          v-model:show={this.selfShowRef}
           onUpdateList={this.handleUpdateList}
         />
         <StartModal

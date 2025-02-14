@@ -66,6 +66,7 @@ export function useTable() {
     timingType: ref('create'),
     timingState: ref('OFFLINE'),
     showRef: ref(false),
+    selfShowRef: ref(false),
     startShowRef: ref(false),
     timingShowRef: ref(false),
     versionShowRef: ref(false),

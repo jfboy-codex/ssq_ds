@@ -143,6 +143,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -1179,6 +1180,96 @@ public class WorkflowDefinitionServiceImpl extends BaseServiceImpl implements Wo
         } else {
             log.error("There is no exported workflow dag data.");
         }
+    }
+
+    /**
+     * batch self export workflow definition
+     */
+    @Override
+    public void batchSelfExportWorkflowDefinition(User loginUser, long projectCode, String type, int num,
+                                                  HttpServletResponse response) {
+
+        Project project = projectMapper.queryByCode(projectCode);
+        // check user access for project
+        Map<String, Object> result =
+                projectService.checkProjectAndAuth(loginUser, project, projectCode, WORKFLOW_DEFINITION_EXPORT);
+        if (result.get(Constants.STATUS) != Status.SUCCESS) {
+            return;
+        }
+        List<DagDataSchedule> dagDataSchedules = getSelfDagDataSchedules(projectCode, num);
+        if (CollectionUtils.isNotEmpty(dagDataSchedules)) {
+            downloadWorkflowDefinitionFile(response, dagDataSchedules);
+        } else {
+            log.error("There is no exported workflow dag data.");
+        }
+    }
+
+    @NotNull
+    private static List<DagDataSchedule> getSelfDagDataSchedules(long projectCode, int num) {
+        // 设置工作流定义
+        WorkflowDefinition workflowDefinition = getSelfWorkflowDefinition(projectCode, num);
+        // 设置任务关系
+        List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
+        for (int i = 1; i <= num; i++) {
+            WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                    projectCode, 0, 0, 0, i, 0,
+                    ConditionType.NONE, "{}");
+            workflowTaskRelation.setId(i);
+            workflowTaskRelationList.add(workflowTaskRelation);
+        }
+        // 设置任务定义
+        List<TaskDefinition> taskDefinitionList = new ArrayList<>();
+        for (int i = 1; i <= num; i++) {
+            TaskDefinition taskDefinition = getSelfTaskDefinition(projectCode, i);
+            taskDefinitionList.add(taskDefinition);
+        }
+        DagData dagData = new DagData(workflowDefinition, workflowTaskRelationList, taskDefinitionList);
+        DagDataSchedule dagDataSchedule = new DagDataSchedule(dagData);
+        List<DagDataSchedule> dagDataSchedules = new ArrayList<>();
+        dagDataSchedules.add(dagDataSchedule);
+        return dagDataSchedules;
+    }
+
+    @NotNull
+    private static TaskDefinition getSelfTaskDefinition(long projectCode, int i) {
+        String name = "t" + i;
+        String taskParams =
+                "{\"localParams\":[],\"resourceList\":[],\"type\":\"MYSQL\",\"datasource\":1,\"sql\":\"SELECT *,sleep(0.05) FROM ssq_data\\r\\nWHERE id BETWEEN 0 AND 100\",\"sqlType\":\"0\",\"preStatements\":[],\"postStatements\":[],\"displayRows\":10}";
+        TaskDefinition taskDefinition = new TaskDefinition(i, 0);
+        taskDefinition.setId(i);
+        taskDefinition.setName(name);
+        taskDefinition.setProjectCode(projectCode);
+        taskDefinition.setTaskType("SQL");
+        taskDefinition.setTaskParams(taskParams);
+        taskDefinition.setFlag(Flag.YES);
+        taskDefinition.setIsCache(Flag.NO);
+        taskDefinition.setTaskPriority(Priority.MEDIUM);
+        taskDefinition.setWorkerGroup("default");
+        taskDefinition.setEnvironmentCode(-1);
+        taskDefinition.setTimeoutFlag(TimeoutFlag.CLOSE);
+        Date now = new Date();
+        taskDefinition.setCreateTime(now);
+        taskDefinition.setUpdateTime(now);
+        return taskDefinition;
+    }
+
+    @NotNull
+    private static WorkflowDefinition getSelfWorkflowDefinition(long projectCode, int num) {
+        StringJoiner jsonArray = new StringJoiner(",", "[", "]");
+        for (int i = 1; i <= num; i++) {
+            // 生成每个 JSON 对象
+            String jsonObject = String.format("{\"taskCode\":%d,\"x\":0,\"y\":0}", i);
+            jsonArray.add(jsonObject);
+        }
+        String locations = jsonArray.toString();
+        WorkflowDefinition workflowDefinition =
+                new WorkflowDefinition(projectCode, "name", 0, "", "[]", locations, 0, 1);
+        workflowDefinition.setId(1);
+        workflowDefinition.setFlag(Flag.YES);
+        workflowDefinition.setVersion(0);
+        workflowDefinition.setReleaseState(ReleaseState.OFFLINE);
+        workflowDefinition.setExecutionType(WorkflowExecutionTypeEnum.PARALLEL);
+        return workflowDefinition;
     }
 
     /**

@@ -261,6 +261,20 @@ public interface WorkflowDefinitionService {
                                               HttpServletResponse response);
 
     /**
+     * batch export workflow definition by codes
+     *
+     * @param loginUser   login user
+     * @param type project code
+     * @param num       workflow definition codes
+     * @param response    http servlet response
+     */
+    void batchSelfExportWorkflowDefinition(User loginUser,
+                                           long projectCode,
+                                           String type,
+                                           int num,
+                                           HttpServletResponse response);
+
+    /**
      * import workflow definition
      *
      * @param loginUser   login user
