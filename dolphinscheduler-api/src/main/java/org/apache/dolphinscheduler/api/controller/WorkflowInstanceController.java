@@ -110,6 +110,8 @@ public class WorkflowInstanceController extends BaseController {
                                             @RequestParam(value = "workflowDefinitionCode", required = false, defaultValue = "0") long workflowDefinitionCode,
                                             @RequestParam(value = "searchVal", required = false) String searchVal,
                                             @RequestParam(value = "executorName", required = false) String executorName,
+                                            @RequestParam(value = "dispatchType", required = false) String dispatchType,
+                                            @RequestParam(value = "dataRate", required = false) Integer dataRate,
                                             @RequestParam(value = "stateType", required = false) WorkflowExecutionStatus stateType,
                                             @RequestParam(value = "host", required = false) String host,
                                             @RequestParam(value = "startDate", required = false) String startTime,
@@ -123,7 +125,7 @@ public class WorkflowInstanceController extends BaseController {
         return workflowInstanceService.queryWorkflowInstanceList(loginUser, projectCode, workflowDefinitionCode,
                 startTime,
                 endTime,
-                searchVal, executorName, stateType, host, otherParamsJson, pageNo, pageSize);
+                searchVal, executorName, dispatchType, dataRate, stateType, host, otherParamsJson, pageNo, pageSize);
     }
 
     /**

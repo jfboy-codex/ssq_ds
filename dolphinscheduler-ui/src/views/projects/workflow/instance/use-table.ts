@@ -59,6 +59,8 @@ export function useTable() {
     totalPage: ref(1),
     totalCount: ref(0),
     searchVal: ref(),
+    dispatchType: ref(),
+    dataRate: ref(),
     executorName: ref(),
     host: ref(),
     stateType: ref(),
@@ -143,6 +145,12 @@ export function useTable() {
         key: 'dispatchType',
         width: 300,
         render: (_row: IWorkflowInstance) => _row.dispatchType || '-'
+      },
+      {
+        title: "数据倍率",
+        key: 'dataRate',
+        width: 300,
+        render: (_row: IWorkflowInstance) => _row.dataRate || '-'
       },
       {
         title: t('project.workflow.start_time'),
@@ -276,10 +284,13 @@ export function useTable() {
   const getTableData = () => {
     if (variables.loadingRef) return
     variables.loadingRef = true
+    console.log(variables)
     const params = {
       pageNo: variables.page,
       pageSize: variables.pageSize,
       searchVal: variables.searchVal,
+      dispatchType: variables.dispatchType,
+      dataRate: variables.dataRate,
       executorName: variables.executorName,
       host: variables.host,
       stateType: variables.stateType,

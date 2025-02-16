@@ -139,6 +139,12 @@
         <if test="executorName != null and executorName != ''">
             and executor_name = #{executorName}
         </if>
+        <if test="dispatchType != null and dispatchType != ''">
+            and dispatch_type = #{dispatchType}
+        </if>
+        <if test="dataRate != null and dataRate != ''">
+            and data_rate = #{dataRate}
+        </if>
         order by start_time desc, end_time desc
     </select>
     <update id="setFailoverByHostAndStateArray">

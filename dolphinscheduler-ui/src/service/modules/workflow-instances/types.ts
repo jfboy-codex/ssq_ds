@@ -90,6 +90,7 @@ interface IWorkflowInstance {
   scheduleTime?: string
   workflowDefinitionCode?: number
   dispatchType: string
+  dataRate: number
   startTime: string
   endTime: string
   duration?: string

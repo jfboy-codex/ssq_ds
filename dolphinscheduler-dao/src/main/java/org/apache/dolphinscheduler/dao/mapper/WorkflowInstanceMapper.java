@@ -115,6 +115,8 @@ public interface WorkflowInstanceMapper extends BaseMapper<WorkflowInstance> {
                                                             @Param("workflowDefinitionCode") Long workflowDefinitionCode,
                                                             @Param("searchVal") String searchVal,
                                                             @Param("executorName") String executorName,
+                                                            @Param("dispatchType") String dispatchType,
+                                                            @Param("dataRate") Integer dataRate,
                                                             @Param("states") int[] statusArray,
                                                             @Param("host") String host,
                                                             @Param("startTime") Date startTime,

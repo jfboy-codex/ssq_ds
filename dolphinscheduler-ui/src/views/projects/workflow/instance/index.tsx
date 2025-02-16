@@ -45,6 +45,8 @@ export default defineComponent({
     const handleSearch = (params: IWorkflowInstanceSearch) => {
       variables.workflowDefinitionCode = params.workflowDefinitionCode
       variables.searchVal = params.searchVal
+      variables.dispatchType = params.dispatchType
+      variables.dataRate = params.dataRate
       variables.executorName = params.executorName
       variables.host = params.host
       variables.stateType = params.stateType

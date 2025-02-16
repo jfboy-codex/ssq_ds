@@ -25,6 +25,8 @@ interface ICountDownParam extends ExecuteReq {
 interface IWorkflowInstanceSearch {
   searchVal: string
   executorName: string
+  dispatchType: string
+  dataRate: number | null
   host: string
   stateType: string
   startDate: string

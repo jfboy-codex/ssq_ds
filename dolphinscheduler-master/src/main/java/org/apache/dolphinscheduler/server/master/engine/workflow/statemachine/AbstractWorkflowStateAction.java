@@ -287,7 +287,7 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
 //                long intervalTime = startTimeMap.get(v) - endTimeMap.get(u);
 //                if (intervalTime < 0) intervalTime = 0;
                 long intervalTime = predictIntervalTime(taskInstanceMap.get(u), taskInstanceMap.get(v));
-                long time = dp.get(v) + taskCompletionTimeMap.get(u) + intervalTime;
+                long time = dp.get(v) + taskCompletionTimeMap.get(u);
                 if (time > dp.get(u)) {
                     dp.put(u, time);
                     next = v;

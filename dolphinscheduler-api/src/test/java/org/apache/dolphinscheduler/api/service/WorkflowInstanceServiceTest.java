@@ -201,6 +201,7 @@ public class WorkflowInstanceServiceTest {
                     "2020-01-02 00:00:00",
                     "",
                     "test_user",
+                    "",
                     WorkflowExecutionStatus.RUNNING_EXECUTION,
                     "192.168.xx.xx",
                     "",
@@ -225,7 +226,7 @@ public class WorkflowInstanceServiceTest {
         when(workflowDefinitionMapper.selectById(Mockito.anyInt())).thenReturn(getProcessDefinition());
         when(workflowInstanceMapper.queryWorkflowInstanceListPaging(Mockito.any(Page.class), Mockito.any(),
                 Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                 eq("192.168.xx.xx"), Mockito.any(), Mockito.any())).thenReturn(pageReturn);
         assertThrows(ServiceException.class, () -> workflowInstanceService.queryWorkflowInstanceList(
                 loginUser,
@@ -235,6 +236,7 @@ public class WorkflowInstanceServiceTest {
                 "20200102 00:00:00",
                 "",
                 loginUser.getUserName(),
+                "",
                 WorkflowExecutionStatus.RUNNING_EXECUTION,
                 "192.168.xx.xx",
                 "",
@@ -254,6 +256,7 @@ public class WorkflowInstanceServiceTest {
                 eq(""),
                 eq(""),
                 Mockito.any(),
+                Mockito.any(),
                 eq("192.168.xx.xx"),
                 eq(start),
                 eq(end)))
@@ -262,16 +265,16 @@ public class WorkflowInstanceServiceTest {
 
         Result successRes =
                 workflowInstanceService.queryWorkflowInstanceList(loginUser, projectCode, 1, "2020-01-01 00:00:00",
-                        "2020-01-02 00:00:00", "", loginUser.getUserName(), WorkflowExecutionStatus.RUNNING_EXECUTION,
+                        "2020-01-02 00:00:00", "", loginUser.getUserName(), "", WorkflowExecutionStatus.RUNNING_EXECUTION,
                         "192.168.xx.xx", "", 1, 10);
         Assertions.assertEquals(Status.SUCCESS.getCode(), (int) successRes.getCode());
 
         // data parameter empty
         when(workflowInstanceMapper.queryWorkflowInstanceListPaging(Mockito.any(Page.class), eq(project.getCode()),
-                eq(1L), eq(""), eq(""), Mockito.any(),
+                eq(1L), eq(""), eq(""), eq(""), Mockito.any(),
                 eq("192.168.xx.xx"), eq(null), eq(null))).thenReturn(pageReturn);
         successRes = workflowInstanceService.queryWorkflowInstanceList(loginUser, projectCode, 1, "",
-                "", "", loginUser.getUserName(), WorkflowExecutionStatus.RUNNING_EXECUTION,
+                "", "", loginUser.getUserName(), "", WorkflowExecutionStatus.RUNNING_EXECUTION,
                 "192.168.xx.xx", "", 1, 10);
         Assertions.assertEquals(Status.SUCCESS.getCode(), (int) successRes.getCode());
 
@@ -280,18 +283,18 @@ public class WorkflowInstanceServiceTest {
         when(usersService.getUserIdByName(loginUser.getUserName())).thenReturn(-1);
         Result executorExistRes =
                 workflowInstanceService.queryWorkflowInstanceList(loginUser, projectCode, 1, "2020-01-01 00:00:00",
-                        "2020-01-02 00:00:00", "", "admin", WorkflowExecutionStatus.RUNNING_EXECUTION,
+                        "2020-01-02 00:00:00", "", "admin", "", WorkflowExecutionStatus.RUNNING_EXECUTION,
                         "192.168.xx.xx", "", 1, 10);
 
         Assertions.assertEquals(Status.SUCCESS.getCode(), (int) executorExistRes.getCode());
 
         // executor name empty
         when(workflowInstanceMapper.queryWorkflowInstanceListPaging(Mockito.any(Page.class), eq(project.getCode()),
-                eq(1L), eq(""), eq("admin"), Mockito.any(),
+                eq(1L), eq(""), eq("admin"), eq(""), Mockito.any(),
                 eq("192.168.xx.xx"), eq(start), eq(end))).thenReturn(pageReturn);
         Result executorEmptyRes =
                 workflowInstanceService.queryWorkflowInstanceList(loginUser, projectCode, 1, "2020-01-01 00:00:00",
-                        "2020-01-02 00:00:00", "", "", WorkflowExecutionStatus.RUNNING_EXECUTION,
+                        "2020-01-02 00:00:00", "", "", "", WorkflowExecutionStatus.RUNNING_EXECUTION,
                         "192.168.xx.xx", "", 1, 10);
         Assertions.assertEquals(Status.SUCCESS.getCode(), (int) executorEmptyRes.getCode());
 

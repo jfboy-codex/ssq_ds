@@ -96,7 +96,7 @@ export const useForm = () => {
       scheduleTime: '',
       dataDateType: 1,
       failureStrategy: 'END',
-      dispatchType: 'TASK_DATA_SCHEDULE',
+      dispatchType: 'BINARY_HUNGARY_GREEDY',
       dataRate: 1,
       warningType: 'NONE',
       warningGroupId: null,

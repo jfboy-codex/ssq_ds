@@ -227,11 +227,17 @@ public abstract class AbstractTaskStateAction implements ITaskStateAction {
         if (Objects.equals(taskInstance.getExeTime(), "0")) { // 如果预测执行时间为0，则使用真实运行时间计算完成时间
             long time = DateUtils.duration2MS(taskInstance.getCompletionTime());
             long completionTime = time + duration;
+            long transferTime = DateUtils.duration2MS(taskInstance.getTransferTime());
+            long waitTime = DateUtils.duration2MS(taskInstance.getWaitTime());
             taskInstance.setExeTime(DateUtils.format2DurationMS(duration));
             taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime));
-            float ru = 0;
-            if (completionTime != 0) {
-                ru = (float) duration / completionTime * 100;
+            float ru = 100;
+            if (transferTime > waitTime) {
+                long tw = transferTime - waitTime;
+                if (duration != 0) {
+                    ru = (float) duration / (duration + tw) * 100;
+                    System.out.println(duration + tw + ru);
+                }
             }
             String resourceUtilization = String.format("%.2f", ru) + "%";
             taskInstance.setResourceUtilization(resourceUtilization);

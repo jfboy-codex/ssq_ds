@@ -87,6 +87,8 @@ public interface WorkflowInstanceService {
                                                                  String endDate,
                                                                  String searchVal,
                                                                  String executorName,
+                                                                 String dispatchType,
+                                                                 Integer dataRate,
                                                                  WorkflowExecutionStatus stateType,
                                                                  String host,
                                                                  String otherParamsJson,

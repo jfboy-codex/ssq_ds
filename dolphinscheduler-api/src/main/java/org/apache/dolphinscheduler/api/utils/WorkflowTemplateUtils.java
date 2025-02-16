@@ -53,23 +53,29 @@ public class WorkflowTemplateUtils {
         int topNum;
         switch (label) {
             case "LIGO":
-                if ((num - 2) % 4 == 0)
-                    topNum = (num - 2) / 4;
-                else
-                    topNum = (num - 2) / 4 + 1;
-                return topNum * 4 + 2;
+                if (num % 23 == 0) return num;
+                else return (num / 23 + 1) * 23;
+//                if ((num - 2) % 4 == 0)
+//                    topNum = (num - 2) / 4;
+//                else
+//                    topNum = (num - 2) / 4 + 1;
+//                return topNum * 4 + 2;
             case "Montage":
-                if ((num - 8) % 3 == 0)
-                    topNum = (num - 8) / 3;
-                else
-                    topNum = (num - 8) / 3 + 1;
-                return topNum * 3 + 8;
+                if (num % 21 == 0) return num;
+                else return (num / 21 + 1) * 21;
+//                if ((num - 8) % 3 == 0)
+//                    topNum = (num - 8) / 3;
+//                else
+//                    topNum = (num - 8) / 3 + 1;
+//                return topNum * 3 + 8;
             case "CyberShake":
-                if ((num - 4) % 4 == 0)
-                    topNum = (num - 4) / 4;
-                else
-                    topNum = (num - 4) / 4 + 1;
-                return topNum * 4 + 4;
+                if (num % 21 == 0) return num;
+                else return (num / 21 + 1) * 21;
+//                if ((num - 4) % 4 == 0)
+//                    topNum = (num - 4) / 4;
+//                else
+//                    topNum = (num - 4) / 4 + 1;
+//                return topNum * 4 + 4;
             default:
                 return num;
         }
@@ -78,14 +84,134 @@ public class WorkflowTemplateUtils {
     private static List<WorkflowTaskRelation> getSelfTaskRelations(long projectCode, String label, int num) {
         switch (label) {
             case "LIGO":
-                return getLIGOTaskRelations(projectCode, num);
+                return getManyLIGOTaskRelations(projectCode, num);
             case "Montage":
-                return getMontageTaskRelations(projectCode, num);
+                return getManyMontageTaskRelations(projectCode, num);
             case "CyberShake":
-                return getCyberShakeTaskRelations(projectCode, num);
+                return getManyCyberShakeTaskRelations(projectCode, num);
             default:
                 return getNoEdgeTaskRelations(projectCode, num);
         }
+    }
+
+    private static List<WorkflowTaskRelation> getManyLIGOTaskRelations(long projectCode, int num) {
+        int oneTaskNum = 23;
+        int oneNum = num / oneTaskNum;
+        int id = 1;
+        List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
+        for (int i = 0; i < oneNum; i++) {
+            List<WorkflowTaskRelation> list = getLIGOTaskRelations(projectCode, oneTaskNum - 1, id, i * oneTaskNum);
+            workflowTaskRelationList.addAll(list);
+            id = id + list.size();
+            int mid = (i + 1) * oneTaskNum;
+            for (int j = mid; j <= mid; j++) {
+                WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                        projectCode, 0, 0, 0, j, 0,
+                        ConditionType.NONE, "{}");
+                workflowTaskRelation.setId(id);
+                workflowTaskRelationList.add(workflowTaskRelation);
+                id ++;
+            }
+            for (int j = mid - 1; j <= mid - 1; j++) {
+                WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                        projectCode, 0, j, 0, mid, 0,
+                        ConditionType.NONE, "{}");
+                workflowTaskRelation.setId(id);
+                workflowTaskRelationList.add(workflowTaskRelation);
+                id ++;
+            }
+            if (i != oneNum - 1) {
+                for (int j = mid + 1; j <= mid + 5; j++) {
+                    WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                            projectCode, 0, mid, 0, j, 0,
+                            ConditionType.NONE, "{}");
+                    workflowTaskRelation.setId(id);
+                    workflowTaskRelationList.add(workflowTaskRelation);
+                    id ++;
+                }
+            }
+        }
+        return workflowTaskRelationList;
+    }
+
+    private static List<WorkflowTaskRelation> getManyMontageTaskRelations(long projectCode, int num) {
+        int oneTaskNum = 21;
+        int oneNum = num / oneTaskNum;
+        int id = 1;
+        List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
+        for (int i = 0; i < oneNum; i++) {
+            List<WorkflowTaskRelation> list = getMontageTaskRelations(projectCode, oneTaskNum - 1, id, i * oneTaskNum);
+            workflowTaskRelationList.addAll(list);
+            id = id + list.size();
+            int mid = (i + 1) * oneTaskNum;
+            for (int j = mid; j <= mid; j++) {
+                WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                        projectCode, 0, 0, 0, j, 0,
+                        ConditionType.NONE, "{}");
+                workflowTaskRelation.setId(id);
+                workflowTaskRelationList.add(workflowTaskRelation);
+                id ++;
+            }
+            for (int j = mid - 1; j <= mid - 1; j++) {
+                WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                        projectCode, 0, j, 0, mid, 0,
+                        ConditionType.NONE, "{}");
+                workflowTaskRelation.setId(id);
+                workflowTaskRelationList.add(workflowTaskRelation);
+                id ++;
+            }
+            if (i != oneNum - 1) {
+                for (int j = mid + 1; j <= mid + 4; j++) {
+                    WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                            projectCode, 0, mid, 0, j, 0,
+                            ConditionType.NONE, "{}");
+                    workflowTaskRelation.setId(id);
+                    workflowTaskRelationList.add(workflowTaskRelation);
+                    id ++;
+                }
+            }
+        }
+        return workflowTaskRelationList;
+    }
+
+    private static List<WorkflowTaskRelation> getManyCyberShakeTaskRelations(long projectCode, int num) {
+        int oneTaskNum = 21;
+        int oneNum = num / oneTaskNum;
+        int id = 1;
+        List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
+        for (int i = 0; i < oneNum; i++) {
+            List<WorkflowTaskRelation> list = getCyberShakeTaskRelations(projectCode, oneTaskNum - 1, id, i * oneTaskNum);
+            workflowTaskRelationList.addAll(list);
+            id = id + list.size();
+            int mid = (i + 1) * oneTaskNum;
+            for (int j = mid; j <= mid; j++) {
+                WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                        projectCode, 0, 0, 0, j, 0,
+                        ConditionType.NONE, "{}");
+                workflowTaskRelation.setId(id);
+                workflowTaskRelationList.add(workflowTaskRelation);
+                id ++;
+            }
+            for (int j = mid - 1; j <= mid - 1; j++) {
+                WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                        projectCode, 0, j, 0, mid, 0,
+                        ConditionType.NONE, "{}");
+                workflowTaskRelation.setId(id);
+                workflowTaskRelationList.add(workflowTaskRelation);
+                id ++;
+            }
+            if (i != oneNum - 1) {
+                for (int j = mid + 1; j <= mid + 2; j++) {
+                    WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                            projectCode, 0, mid, 0, j, 0,
+                            ConditionType.NONE, "{}");
+                    workflowTaskRelation.setId(id);
+                    workflowTaskRelationList.add(workflowTaskRelation);
+                    id ++;
+                }
+            }
+        }
+        return workflowTaskRelationList;
     }
 
     private static List<WorkflowTaskRelation> getNoEdgeTaskRelations(long projectCode, int num) {
@@ -100,13 +226,13 @@ public class WorkflowTemplateUtils {
         return workflowTaskRelationList;
     }
 
-    private static List<WorkflowTaskRelation> getLIGOTaskRelations(long projectCode, int num) {
+    private static List<WorkflowTaskRelation> getLIGOTaskRelations(long projectCode, int num, int index, int offset) {
         List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
         int topNum = (num - 2) / 4;
-        int id = 1;
+        int id = index;
         for (int i = 1; i <= num; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, 0, 0, i, 0,
+                    projectCode, 0, 0, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -114,7 +240,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum + 1; i <= topNum * 2; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - topNum, 0, i, 0,
+                    projectCode, 0, i - topNum + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -122,7 +248,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum + 1; i <= topNum * 2; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i, 0, topNum * 2 + 1, 0,
+                    projectCode, 0, i + offset, 0, topNum * 2 + 1 + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -130,7 +256,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 2 + 2; i <= topNum * 3 + 1; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, topNum * 2 + 1, 0, i, 0,
+                    projectCode, 0, topNum * 2 + 1 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -138,7 +264,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 3 + 2; i <= topNum * 4 + 1; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - topNum, 0, i, 0,
+                    projectCode, 0, i - topNum + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -146,7 +272,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 3 + 2; i <= topNum * 4 + 1; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i, 0, topNum * 4 + 2, 0,
+                    projectCode, 0, i + offset, 0, topNum * 4 + 2 + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -155,13 +281,13 @@ public class WorkflowTemplateUtils {
         return workflowTaskRelationList;
     }
 
-    private static List<WorkflowTaskRelation> getCyberShakeTaskRelations(long projectCode, int num) {
+    private static List<WorkflowTaskRelation> getCyberShakeTaskRelations(long projectCode, int num, int index, int offset) {
         List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
         int topNum = (num - 4) / 4;
-        int id = 1;
+        int id = index;
         for (int i = 1; i <= num; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, 0, 0, i, 0,
+                    projectCode, 0, 0, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -169,7 +295,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = 3; i <= topNum + 2; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, 1, 0, i, 0,
+                    projectCode, 0, 1 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -177,7 +303,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum + 3; i <= topNum * 2 + 2; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, 2, 0, i, 0,
+                    projectCode, 0, 2 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -185,7 +311,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = 3; i <= topNum * 2 + 2; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i, 0, topNum * 2 + 3, 0,
+                    projectCode, 0, i + offset, 0, topNum * 2 + 3 + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -193,7 +319,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 2 + 4; i <= topNum * 4 + 3; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - topNum * 2 - 1, 0, i, 0,
+                    projectCode, 0, i - topNum * 2 - 1 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -201,7 +327,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 2 + 4; i <= topNum * 4 + 3; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i, 0, topNum * 4 + 4, 0,
+                    projectCode, 0, i + offset, 0, topNum * 4 + 4 + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -210,13 +336,13 @@ public class WorkflowTemplateUtils {
         return workflowTaskRelationList;
     }
 
-    private static List<WorkflowTaskRelation> getMontageTaskRelations(long projectCode, int num) {
+    private static List<WorkflowTaskRelation> getMontageTaskRelations(long projectCode, int num, int index, int offset) {
         List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
         int topNum = (num - 8) / 3;
-        int id = 1;
+        int id = index;
         for (int i = 1; i <= num; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, 0, 0, i, 0,
+                    projectCode, 0, 0, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -224,7 +350,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum + 1; i <= topNum * 2; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - topNum, 0, i, 0,
+                    projectCode, 0, i - topNum + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -232,7 +358,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 2 + 2; i <= topNum * 2 + 2; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - topNum - 2, 0, i, 0,
+                    projectCode, 0, i - topNum - 2 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -240,7 +366,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum + 2; i <= topNum * 2 + 1; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - topNum - 1, 0, i, 0,
+                    projectCode, 0, i - topNum - 1 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -248,7 +374,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum + 1; i <= topNum * 2 + 2; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i, 0, topNum * 2 + 3, 0,
+                    projectCode, 0, i + offset, 0, topNum * 2 + 3 + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -256,7 +382,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 2 + 4; i <= topNum * 2 + 4; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - 1, 0, i, 0,
+                    projectCode, 0, i - 1 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -264,7 +390,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 2 + 5; i <= topNum * 3 + 4; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, topNum * 2 + 4, 0, i, 0,
+                    projectCode, 0, topNum * 2 + 4 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -272,7 +398,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 2 + 5; i <= topNum * 3 + 4; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - topNum * 2 - 4, 0, i, 0,
+                    projectCode, 0, i - topNum * 2 - 4 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -280,7 +406,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 2 + 5; i <= topNum * 3 + 4; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i, 0, topNum * 3 + 5, 0,
+                    projectCode, 0, i + offset, 0, topNum * 3 + 5 + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);
@@ -288,7 +414,7 @@ public class WorkflowTemplateUtils {
         }
         for (int i = topNum * 3 + 6; i <= topNum * 3 + 8; i++) {
             WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
-                    projectCode, 0, i - 1, 0, i, 0,
+                    projectCode, 0, i - 1 + offset, 0, i + offset, 0,
                     ConditionType.NONE, "{}");
             workflowTaskRelation.setId(id);
             workflowTaskRelationList.add(workflowTaskRelation);

@@ -187,6 +187,7 @@ public class WorkflowInstanceMapperTest extends BaseDaoTest {
                 workflowInstance.getWorkflowDefinitionCode(),
                 workflowInstance.getName(),
                 "",
+                "",
                 stateArray,
                 workflowInstance.getHost(),
                 null,
