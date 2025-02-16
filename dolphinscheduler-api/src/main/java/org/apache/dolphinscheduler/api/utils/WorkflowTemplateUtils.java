@@ -53,29 +53,35 @@ public class WorkflowTemplateUtils {
         int topNum;
         switch (label) {
             case "LIGO":
-                if (num % 23 == 0) return num;
-                else return (num / 23 + 1) * 23;
-//                if ((num - 2) % 4 == 0)
-//                    topNum = (num - 2) / 4;
-//                else
-//                    topNum = (num - 2) / 4 + 1;
-//                return topNum * 4 + 2;
+                if (num % 23 == 0)
+                    return num;
+                else
+                    return (num / 23 + 1) * 23;
+                // if ((num - 2) % 4 == 0)
+                // topNum = (num - 2) / 4;
+                // else
+                // topNum = (num - 2) / 4 + 1;
+                // return topNum * 4 + 2;
             case "Montage":
-                if (num % 21 == 0) return num;
-                else return (num / 21 + 1) * 21;
-//                if ((num - 8) % 3 == 0)
-//                    topNum = (num - 8) / 3;
-//                else
-//                    topNum = (num - 8) / 3 + 1;
-//                return topNum * 3 + 8;
+                if (num % 21 == 0)
+                    return num;
+                else
+                    return (num / 21 + 1) * 21;
+                // if ((num - 8) % 3 == 0)
+                // topNum = (num - 8) / 3;
+                // else
+                // topNum = (num - 8) / 3 + 1;
+                // return topNum * 3 + 8;
             case "CyberShake":
-                if (num % 21 == 0) return num;
-                else return (num / 21 + 1) * 21;
-//                if ((num - 4) % 4 == 0)
-//                    topNum = (num - 4) / 4;
-//                else
-//                    topNum = (num - 4) / 4 + 1;
-//                return topNum * 4 + 4;
+                if (num % 21 == 0)
+                    return num;
+                else
+                    return (num / 21 + 1) * 21;
+                // if ((num - 4) % 4 == 0)
+                // topNum = (num - 4) / 4;
+                // else
+                // topNum = (num - 4) / 4 + 1;
+                // return topNum * 4 + 4;
             default:
                 return num;
         }
@@ -110,7 +116,7 @@ public class WorkflowTemplateUtils {
                         ConditionType.NONE, "{}");
                 workflowTaskRelation.setId(id);
                 workflowTaskRelationList.add(workflowTaskRelation);
-                id ++;
+                id++;
             }
             for (int j = mid - 1; j <= mid - 1; j++) {
                 WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
@@ -118,7 +124,7 @@ public class WorkflowTemplateUtils {
                         ConditionType.NONE, "{}");
                 workflowTaskRelation.setId(id);
                 workflowTaskRelationList.add(workflowTaskRelation);
-                id ++;
+                id++;
             }
             if (i != oneNum - 1) {
                 for (int j = mid + 1; j <= mid + 5; j++) {
@@ -127,7 +133,7 @@ public class WorkflowTemplateUtils {
                             ConditionType.NONE, "{}");
                     workflowTaskRelation.setId(id);
                     workflowTaskRelationList.add(workflowTaskRelation);
-                    id ++;
+                    id++;
                 }
             }
         }
@@ -150,7 +156,7 @@ public class WorkflowTemplateUtils {
                         ConditionType.NONE, "{}");
                 workflowTaskRelation.setId(id);
                 workflowTaskRelationList.add(workflowTaskRelation);
-                id ++;
+                id++;
             }
             for (int j = mid - 1; j <= mid - 1; j++) {
                 WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
@@ -158,7 +164,7 @@ public class WorkflowTemplateUtils {
                         ConditionType.NONE, "{}");
                 workflowTaskRelation.setId(id);
                 workflowTaskRelationList.add(workflowTaskRelation);
-                id ++;
+                id++;
             }
             if (i != oneNum - 1) {
                 for (int j = mid + 1; j <= mid + 4; j++) {
@@ -167,7 +173,7 @@ public class WorkflowTemplateUtils {
                             ConditionType.NONE, "{}");
                     workflowTaskRelation.setId(id);
                     workflowTaskRelationList.add(workflowTaskRelation);
-                    id ++;
+                    id++;
                 }
             }
         }
@@ -180,7 +186,8 @@ public class WorkflowTemplateUtils {
         int id = 1;
         List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
         for (int i = 0; i < oneNum; i++) {
-            List<WorkflowTaskRelation> list = getCyberShakeTaskRelations(projectCode, oneTaskNum - 1, id, i * oneTaskNum);
+            List<WorkflowTaskRelation> list =
+                    getCyberShakeTaskRelations(projectCode, oneTaskNum - 1, id, i * oneTaskNum);
             workflowTaskRelationList.addAll(list);
             id = id + list.size();
             int mid = (i + 1) * oneTaskNum;
@@ -190,7 +197,7 @@ public class WorkflowTemplateUtils {
                         ConditionType.NONE, "{}");
                 workflowTaskRelation.setId(id);
                 workflowTaskRelationList.add(workflowTaskRelation);
-                id ++;
+                id++;
             }
             for (int j = mid - 1; j <= mid - 1; j++) {
                 WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
@@ -198,7 +205,7 @@ public class WorkflowTemplateUtils {
                         ConditionType.NONE, "{}");
                 workflowTaskRelation.setId(id);
                 workflowTaskRelationList.add(workflowTaskRelation);
-                id ++;
+                id++;
             }
             if (i != oneNum - 1) {
                 for (int j = mid + 1; j <= mid + 2; j++) {
@@ -207,7 +214,7 @@ public class WorkflowTemplateUtils {
                             ConditionType.NONE, "{}");
                     workflowTaskRelation.setId(id);
                     workflowTaskRelationList.add(workflowTaskRelation);
-                    id ++;
+                    id++;
                 }
             }
         }
@@ -281,7 +288,8 @@ public class WorkflowTemplateUtils {
         return workflowTaskRelationList;
     }
 
-    private static List<WorkflowTaskRelation> getCyberShakeTaskRelations(long projectCode, int num, int index, int offset) {
+    private static List<WorkflowTaskRelation> getCyberShakeTaskRelations(long projectCode, int num, int index,
+                                                                         int offset) {
         List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
         int topNum = (num - 4) / 4;
         int id = index;
@@ -336,7 +344,8 @@ public class WorkflowTemplateUtils {
         return workflowTaskRelationList;
     }
 
-    private static List<WorkflowTaskRelation> getMontageTaskRelations(long projectCode, int num, int index, int offset) {
+    private static List<WorkflowTaskRelation> getMontageTaskRelations(long projectCode, int num, int index,
+                                                                      int offset) {
         List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
         int topNum = (num - 8) / 3;
         int id = index;

@@ -43,7 +43,6 @@ import org.apache.dolphinscheduler.server.master.exception.dispatch.TaskDispatch
 import org.apache.dolphinscheduler.service.bean.SpringApplicationContext;
 import org.apache.dolphinscheduler.service.process.ProcessService;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -261,7 +260,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         tasksExecutionRunnable.setHostUsableTimeTable(hostUsableTimeTable);
 
         // 获取任务所需数据信息
-        Table<Long, Long, IntermediateData> tasksNeedTasksData = getTasksNeedTasksData(taskExecutionRunnableList, dataRate);
+        Table<Long, Long, IntermediateData> tasksNeedTasksData =
+                getTasksNeedTasksData(taskExecutionRunnableList, dataRate);
         BiMap<Integer, Long> dataBiMap = HashBiMap.create();
         Map<Long, HostThread> dataHostThreadMap = new HashMap<>();
         int dataIndex = 0;
@@ -286,7 +286,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         return tasksExecutionRunnable;
     }
 
-    public Table<Long, Long, IntermediateData> getTasksNeedTasksData(@NonNull List<ITaskExecutionRunnable> taskExecutionRunnableList, int dataRate) {
+    public Table<Long, Long, IntermediateData> getTasksNeedTasksData(@NonNull List<ITaskExecutionRunnable> taskExecutionRunnableList,
+                                                                     int dataRate) {
         Table<Long, Long, IntermediateData> taskDataTable = HashBasedTable.create();
         for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();

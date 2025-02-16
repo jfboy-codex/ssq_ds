@@ -26,7 +26,6 @@ import org.apache.dolphinscheduler.server.master.cluster.IClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerServerMetadata;
 import org.apache.dolphinscheduler.server.master.cluster.solver.XSolverBinaryHungaryDfs;
-import org.apache.dolphinscheduler.server.master.cluster.solver.XSolverGurobi;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
 
@@ -115,9 +114,9 @@ public class FlutterWorkerLoadBalancer implements IWorkerLoadBalancer {
         BiMap<Integer, Long> taskBiMap = tasksExecutionRunnable.getTaskBiMap();
 
         Table<Long, HostThread, Long> timeTable = getXTimeTable(weightedServers, tasksExecutionRunnable); // s(t,j)
-//        XSolverGurobi xSolverGurobi = new XSolverGurobi(taskBiMap, hostThreadBiMap, timeTable);
-//        tasksExecutionRunnable.setTasksHostThreadMap(xSolverGurobi.solve());
-//        long time = xSolverGurobi.getOptimalTime();
+        // XSolverGurobi xSolverGurobi = new XSolverGurobi(taskBiMap, hostThreadBiMap, timeTable);
+        // tasksExecutionRunnable.setTasksHostThreadMap(xSolverGurobi.solve());
+        // long time = xSolverGurobi.getOptimalTime();
         XSolverBinaryHungaryDfs xSolverBinaryHungaryDfs =
                 new XSolverBinaryHungaryDfs(taskBiMap, hostThreadBiMap, timeTable);
         tasksExecutionRunnable.setTasksHostThreadMap(xSolverBinaryHungaryDfs.solve());
