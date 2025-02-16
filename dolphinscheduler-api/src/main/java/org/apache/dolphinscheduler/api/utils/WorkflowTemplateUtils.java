@@ -320,7 +320,7 @@ public class WorkflowTemplateUtils {
         for (int i = 1; i <= num; i++) {
             String name = "t" + i;
             String taskParams =
-                    "{\"localParams\":[],\"resourceList\":[],\"type\":\"MYSQL\",\"datasource\":1,\"sql\":\"SELECT *,sleep(0.05) FROM ssq_data\\r\\nWHERE id BETWEEN 0 AND 100\",\"sqlType\":\"0\",\"preStatements\":[],\"postStatements\":[],\"displayRows\":10}";
+                    "{\"localParams\":[],\"resourceList\":[],\"type\":\"MYSQL\",\"datasource\":1,\"sql\":\"SELECT * FROM ssq_data\\r\\nWHERE id BETWEEN 0 AND 10\",\"sqlType\":\"0\",\"preStatements\":[],\"postStatements\":[],\"displayRows\":10}";
             TaskDefinition taskDefinition = new TaskDefinition(i, 0);
             taskDefinition.setId(i);
             taskDefinition.setName(name);

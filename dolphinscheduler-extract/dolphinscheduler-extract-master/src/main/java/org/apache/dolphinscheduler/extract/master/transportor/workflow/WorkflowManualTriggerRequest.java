@@ -57,6 +57,8 @@ public class WorkflowManualTriggerRequest {
 
     private String dispatchType;
 
+    private int dataRate;
+
     private Integer warningGroupId;
 
     @Builder.Default

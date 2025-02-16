@@ -129,7 +129,7 @@ export default defineComponent({
               </li>
               <li>
                 {"输出数据量"}:{' '}
-                {(new TextEncoder().encode(this.taskInstance.varPool).length*8)+"B"}
+                {this.taskInstance.outputDataSize}
               </li>
               <li>
                 {"数据位置"}:{' '}

@@ -67,6 +67,7 @@ public class WorkflowScheduleTrigger
         workflowInstance
                 .setWarningType(ObjectUtils.defaultIfNull(scheduleTriggerRequest.getWarningType(), WarningType.NONE));
         workflowInstance.setDispatchType(scheduleTriggerRequest.getDispatchType());
+        workflowInstance.setDataRate(scheduleTriggerRequest.getDataRate());
         workflowInstance.setWarningGroupId(scheduleTriggerRequest.getWarningGroupId());
         workflowInstance.setExecutorId(scheduleTriggerRequest.getUserId());
         workflowInstance.setExecutorName(getExecutorUser(scheduleTriggerRequest.getUserId()).getUserName());

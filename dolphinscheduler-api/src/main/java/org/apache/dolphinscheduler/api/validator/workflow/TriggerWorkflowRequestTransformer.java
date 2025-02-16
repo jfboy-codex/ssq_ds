@@ -47,6 +47,7 @@ public class TriggerWorkflowRequestTransformer implements ITransformer<WorkflowT
                 .execType(workflowTriggerRequest.getExecType())
                 .warningType(workflowTriggerRequest.getWarningType())
                 .dispatchType(workflowTriggerRequest.getDispatchType())
+                .dataRate(workflowTriggerRequest.getDataRate())
                 .warningGroupId(workflowTriggerRequest.getWarningGroupId())
                 .workflowInstancePriority(workflowTriggerRequest.getWorkflowInstancePriority())
                 .workerGroup(workflowTriggerRequest.getWorkerGroup())

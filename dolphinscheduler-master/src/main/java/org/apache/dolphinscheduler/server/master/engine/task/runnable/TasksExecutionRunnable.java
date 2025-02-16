@@ -38,6 +38,8 @@ public class TasksExecutionRunnable {
 
     private String dispatchType; // 调度策略
 
+    private int dataRate; // 数据倍率
+
     private String workerGroup; // 工作组
 
     private Map<Host, Integer> hostThreadNum; // host线程数

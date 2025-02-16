@@ -69,6 +69,7 @@ public class WorkflowManualTrigger
         workflowInstance.setWarningType(
                 ObjectUtils.defaultIfNull(workflowManualTriggerRequest.getWarningType(), WarningType.NONE));
         workflowInstance.setDispatchType(workflowManualTriggerRequest.getDispatchType());
+        workflowInstance.setDataRate(workflowManualTriggerRequest.getDataRate());
         workflowInstance.setWarningGroupId(workflowManualTriggerRequest.getWarningGroupId());
         workflowInstance.setExecutorId(workflowManualTriggerRequest.getUserId());
         workflowInstance.setExecutorName(getExecutorUser(workflowManualTriggerRequest.getUserId()).getUserName());

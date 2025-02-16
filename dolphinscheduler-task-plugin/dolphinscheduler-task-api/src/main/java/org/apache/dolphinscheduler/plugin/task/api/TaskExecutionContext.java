@@ -132,6 +132,8 @@ public class TaskExecutionContext implements Serializable {
 
     private String outResult;
 
+    private String outputDataSize;
+
     private int dryRun;
 
     private Map<String, Property> paramsMap;

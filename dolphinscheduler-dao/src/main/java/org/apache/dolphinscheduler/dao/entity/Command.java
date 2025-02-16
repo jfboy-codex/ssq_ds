@@ -89,6 +89,10 @@ public class Command {
     private String dispatchType;
 
     @Deprecated
+    @TableField("data_rate")
+    private int dataRate;
+
+    @Deprecated
     @TableField("warning_group_id")
     private Integer warningGroupId;
 

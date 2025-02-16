@@ -57,6 +57,8 @@ public class TriggerWorkflowDTO {
 
     private String dispatchType;
 
+    private int dataRate;
+
     private Integer warningGroupId;
 
     private RunMode runMode;

@@ -305,7 +305,6 @@ public class SqlParameters extends AbstractParameters {
         }
         varPool = VarPoolUtils.mergeVarPool(Lists.newArrayList(varPool, outProperty));
         outResult = outProperty;
-
     }
 
     @Override

@@ -141,6 +141,7 @@ public class ExecutorController extends BaseController {
                                                            @RequestParam(value = "execType", required = false, defaultValue = "START_PROCESS") CommandType execType,
                                                            @RequestParam(value = "warningType") WarningType warningType,
                                                            @RequestParam(value = "dispatchType") String dispatchType,
+                                                           @RequestParam(value = "dataRate") int dataRate,
                                                            @RequestParam(value = "warningGroupId", required = false) Integer warningGroupId,
                                                            @RequestParam(value = "runMode", required = false) RunMode runMode,
                                                            @RequestParam(value = "workflowInstancePriority", required = false) Priority workflowInstancePriority,
@@ -165,6 +166,7 @@ public class ExecutorController extends BaseController {
                         .execType(execType)
                         .warningType(warningType)
                         .dispatchType(dispatchType)
+                        .dataRate(dataRate)
                         .warningGroupId(warningGroupId)
                         .workflowInstancePriority(workflowInstancePriority)
                         .workerGroup(workerGroup)
@@ -186,6 +188,7 @@ public class ExecutorController extends BaseController {
                         .execType(execType)
                         .warningType(warningType)
                         .dispatchType(dispatchType)
+                        .dataRate(dataRate)
                         .warningGroupId(warningGroupId)
                         .backfillRunMode(runMode)
                         .workflowInstancePriority(workflowInstancePriority)
@@ -265,6 +268,7 @@ public class ExecutorController extends BaseController {
                                                                  @RequestParam(value = "execType", required = false) CommandType execType,
                                                                  @RequestParam(value = "warningType") WarningType warningType,
                                                                  @RequestParam(value = "dispatchType") String dispatchType,
+                                                                 @RequestParam(value = "dataRate") int dataRate,
                                                                  @RequestParam(value = "warningGroupId", required = false) Integer warningGroupId,
                                                                  @RequestParam(value = "runMode", required = false) RunMode runMode,
                                                                  @RequestParam(value = "workflowInstancePriority", required = false) Priority workflowInstancePriority,
@@ -293,6 +297,7 @@ public class ExecutorController extends BaseController {
                     execType,
                     warningType,
                     dispatchType,
+                    dataRate,
                     warningGroupId,
                     runMode,
                     workflowInstancePriority,

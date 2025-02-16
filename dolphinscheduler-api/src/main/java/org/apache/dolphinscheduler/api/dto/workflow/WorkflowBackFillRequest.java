@@ -55,6 +55,8 @@ public class WorkflowBackFillRequest {
 
     private String dispatchType;
 
+    private int dataRate;
+
     private Integer warningGroupId;
 
     private Priority workflowInstancePriority;

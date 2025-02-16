@@ -25,6 +25,7 @@ import org.apache.dolphinscheduler.extract.base.utils.HostThread;
 import org.apache.dolphinscheduler.server.master.cluster.IClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerClusters;
 import org.apache.dolphinscheduler.server.master.cluster.WorkerServerMetadata;
+import org.apache.dolphinscheduler.server.master.cluster.solver.XSolverBinaryHungaryDfs;
 import org.apache.dolphinscheduler.server.master.cluster.solver.XSolverGurobi;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.TasksExecutionRunnable;
@@ -122,9 +123,13 @@ public class MaxMinFairnessWorkerLoadBalancer implements IWorkerLoadBalancer {
 
         int num = taskBiMap.size();
         while (num > 0) {
-            XSolverGurobi xSolverGurobi = new XSolverGurobi(dynamicTaskBiMap, dynamicHostThreadBiMap, timeTable);
-            Map<Long, HostThread> taskHostThreadMap = xSolverGurobi.solve();
-            long optimalTime = xSolverGurobi.getOptimalTime();
+//            XSolverGurobi xSolverGurobi = new XSolverGurobi(dynamicTaskBiMap, dynamicHostThreadBiMap, timeTable);
+//            Map<Long, HostThread> taskHostThreadMap = xSolverGurobi.solve();
+//            long optimalTime = xSolverGurobi.getOptimalTime();
+            XSolverBinaryHungaryDfs xSolverBinaryHungaryDfs =
+                    new XSolverBinaryHungaryDfs(dynamicTaskBiMap, dynamicHostThreadBiMap, timeTable);
+            Map<Long, HostThread> taskHostThreadMap = xSolverBinaryHungaryDfs.solve();
+            long optimalTime = xSolverBinaryHungaryDfs.getOptimalTime();
             timeList.add(optimalTime);
 
             // 找到最长任务从x参数列表中去除，更新线程列表

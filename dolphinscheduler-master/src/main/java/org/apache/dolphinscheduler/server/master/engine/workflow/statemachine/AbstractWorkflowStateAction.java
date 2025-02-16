@@ -19,6 +19,7 @@ package org.apache.dolphinscheduler.server.master.engine.workflow.statemachine;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import lombok.NonNull;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
@@ -154,12 +155,63 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         List<TaskInstance> currentTaskInstanceList =
                 processService.findTaskInstanceByWorkflowInstanceId(workflowInstance.getId());
         float ru = 0;
+        int len = 0;
         for (TaskInstance taskInstance : currentTaskInstanceList) {
             String taskRU = taskInstance.getResourceUtilization();
-            ru += Float.parseFloat(taskRU.substring(0, taskRU.length() - 1));
+            float num = Float.parseFloat(taskRU.substring(0, taskRU.length() - 1));
+            if (num != 0) {
+                ru += num;
+                len += 1;
+            }
         }
-        ru /= currentTaskInstanceList.size();
+        ru /= len;
         return String.format("%.2f", ru) + "%";
+    }
+
+    public long predictIntervalTime(TaskInstance left, TaskInstance right) {
+        // 获取往期任务实例
+        List<TaskInstance> oldLeftTaskInstanceList = processService.querySuccessTaskInstanceByTaskCode(
+                left.getTaskCode(), left.getTaskDefinitionVersion(), 10);
+        List<TaskInstance> oldRightTaskInstanceList = processService.querySuccessTaskInstanceByTaskCode(
+                right.getTaskCode(), right.getTaskDefinitionVersion(), 10
+        );
+        List<Integer> workflowInstanceIds = new ArrayList<>();
+        Map<Integer, TaskInstance> workflowLeftTasks = new HashMap<>();
+        for (TaskInstance task : oldLeftTaskInstanceList) {
+            workflowLeftTasks.put(task.getWorkflowInstanceId(), task);
+            workflowInstanceIds.add(task.getWorkflowInstanceId());
+        }
+        Map<Integer, TaskInstance> workflowRightTasks = new HashMap<>();
+        for (TaskInstance task : oldRightTaskInstanceList) {
+            workflowRightTasks.put(task.getWorkflowInstanceId(), task);
+            workflowInstanceIds.add(task.getWorkflowInstanceId());
+        }
+
+        // 用于存储所有的时间值
+        List<Long> durationList = new ArrayList<>();
+        // 求每个任务实例的持续时间并添加到列表中
+        for (Integer id : workflowInstanceIds) {
+            if (workflowLeftTasks.containsKey(id) && workflowRightTasks.containsKey(id)) {
+                long startTime = workflowLeftTasks.get(id).getEndTime().getTime();
+                if (workflowRightTasks.get(id).getStartTime()!=null) {
+                    long endTime = workflowRightTasks.get(id).getStartTime().getTime();
+                    long time = endTime - startTime;
+                    if (time < 0) time = 0;
+                    durationList.add(time);
+                }
+            }
+        }
+
+        // 计算平均值
+        double sum = 0;
+        for (Long duration : durationList) {
+            sum += duration;
+        }
+
+        if (durationList.isEmpty())
+            return 0;
+        else
+            return (long) (sum / durationList.size());
     }
 
     protected long getCompletionTime(final IWorkflowExecutionRunnable workflowExecutionRunnable) {
@@ -173,13 +225,16 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
                 processService.findTaskInstanceByWorkflowInstanceId(workflowInstance.getId());
         // 定义每个任务的完成时间，初始化为运行时间
         Map<Long, Long> taskCompletionTimeMap = new HashMap<>();
+        // dp(u)表示从u开始一直到连接的最后节点之间的时间
         Map<Long, Long> dp = new HashMap<>();
         Map<Long, Queue<Long>> paths = new HashMap<>();
         Map<Long, TaskInstance> taskInstanceMap = new HashMap<>();
-        // 定义邻接表
+        // 定义邻接表(u的后继节点v集合)
         Map<Long, Vector<Long>> taskAdjMap = new HashMap<>();
         // 定义每个任务的入度，初始化为0
         Map<Long, Integer> taskInDegreeMap = new HashMap<>();
+//        Map<Long, Long> endTimeMap = new HashMap<>();
+//        Map<Long, Long> startTimeMap = new HashMap<>();
         for (TaskInstance taskInstance : currentTaskInstanceList) {
             long taskCode = taskInstance.getTaskCode();
             taskInstanceMap.put(taskCode, taskInstance);
@@ -189,6 +244,8 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
             paths.get(taskCode).add(taskCode);
             taskInDegreeMap.put(taskCode, 0);
             taskAdjMap.put(taskCode, new Vector<>());
+//            endTimeMap.put(taskCode, taskInstance.getEndTime().getTime());
+//            startTimeMap.put(taskCode, taskInstance.getStartTime().getTime());
         }
         // 计算每个任务的入度和邻接表
         for (WorkflowTaskRelation relation : relationList) {
@@ -218,6 +275,7 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         // 动态规划计算最大路径
         Queue<Long> keyPath = new LinkedList<>();
         long complentionTime = 0;
+        // 从后面开始
         for (int i = taskOrderedList.size() - 1; i >= 0; i--) {
             long u = taskOrderedList.get(i);
             Queue<Long> uPath = paths.get(u);
@@ -226,7 +284,10 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
             }
             Long next = null;
             for (long v : taskAdjMap.get(u)) {
-                long time = dp.get(v) + taskCompletionTimeMap.get(u);
+//                long intervalTime = startTimeMap.get(v) - endTimeMap.get(u);
+//                if (intervalTime < 0) intervalTime = 0;
+                long intervalTime = predictIntervalTime(taskInstanceMap.get(u), taskInstanceMap.get(v));
+                long time = dp.get(v) + taskCompletionTimeMap.get(u) + intervalTime;
                 if (time > dp.get(u)) {
                     dp.put(u, time);
                     next = v;

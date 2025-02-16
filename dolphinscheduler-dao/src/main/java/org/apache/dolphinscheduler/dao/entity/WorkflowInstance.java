@@ -168,6 +168,8 @@ public class WorkflowInstance {
 
     private String resourceUtilization;
 
+    private int dataRate;
+
     /**
      * set the process name with process define version and timestamp
      *

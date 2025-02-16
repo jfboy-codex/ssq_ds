@@ -79,10 +79,14 @@ public class XSolverHungary {
         printMatrix(costMatrix);
         boolean flag = coverZeros(costMatrix, coverMatrix, markedZeros);
         while (!flag) {
-            adjustMatrix(costMatrix, markedZeros);
-            coverMatrix = new int[J][J];
-            markedZeros = new ArrayList<>();
-            flag = coverZeros(costMatrix, coverMatrix, markedZeros);
+            boolean type = adjustMatrix(costMatrix, markedZeros);
+            if (type) {
+                coverMatrix = new int[J][J];
+                markedZeros = new ArrayList<>();
+                flag = coverZeros(costMatrix, coverMatrix, markedZeros);
+            } else {
+                flag = true;
+            }
         }
         for (int[] markedZero : markedZeros) {
             if (markedZero[0] < T) {
@@ -173,7 +177,7 @@ public class XSolverHungary {
         }
     }
 
-    public static void adjustMatrix(long[][] costMatrix, List<int[]> markedZeros) {
+    public static boolean adjustMatrix(long[][] costMatrix, List<int[]> markedZeros) {
         List<Integer> tickedRow = new ArrayList<>();
         List<Integer> tickedColumn = new ArrayList<>();
         tickLine(costMatrix, markedZeros, tickedRow, tickedColumn);
@@ -195,17 +199,37 @@ public class XSolverHungary {
             }
         }
         if (noLinedElements.isEmpty()) {
+            adjustZeros(costMatrix, markedZeros);
             log.error("所有数都被划过！");
-        }
-        long miniK = Collections.min(noLinedElements);
-        for (int i = 0; i < costMatrix.length; i++) {
-            for (int j = 0; j < costMatrix[i].length; j++) {
-                if (linedRow.contains(i) && linedColumn.contains(j)) {
-                    costMatrix[i][j] += miniK;
-                } else if (!linedRow.contains(i) && !linedColumn.contains(j)) {
-                    costMatrix[i][j] -= miniK;
+            return false;
+        } else {
+            long miniK = Collections.min(noLinedElements);
+            for (int i = 0; i < costMatrix.length; i++) {
+                for (int j = 0; j < costMatrix[i].length; j++) {
+                    if (linedRow.contains(i) && linedColumn.contains(j)) {
+                        costMatrix[i][j] += miniK;
+                    } else if (!linedRow.contains(i) && !linedColumn.contains(j)) {
+                        costMatrix[i][j] -= miniK;
+                    }
                 }
             }
+            return true;
+        }
+    }
+
+    public static void adjustZeros(long[][] costMatrix, List<int[]> markedZeros) {
+        List<Integer> rowZero = new ArrayList<>();
+        List<Integer> columnZero = new ArrayList<>();
+        for (int i = 0; i < costMatrix.length; i++) {
+            rowZero.add(i);
+            columnZero.add(i);
+        }
+        for (int i = 0; i < markedZeros.size(); i++) {
+            rowZero.remove(Integer.valueOf(markedZeros.get(i)[0]));
+            columnZero.remove(Integer.valueOf(markedZeros.get(i)[1]));
+        }
+        for (int i = 0; i < rowZero.size(); i++) {
+            markedZeros.add(new int[]{rowZero.get(i), columnZero.get(i)});
         }
     }
 

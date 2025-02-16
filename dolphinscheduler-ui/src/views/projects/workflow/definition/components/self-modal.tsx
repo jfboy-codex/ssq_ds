@@ -56,8 +56,8 @@ export default defineComponent({
         value: 'Montage',
       },
       {
-        label: 'SyberShake',
-        value: 'SyberShake',
+        label: 'CyberShake',
+        value: 'CyberShake',
       },
       {
         label: 'LIGO',

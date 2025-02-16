@@ -72,6 +72,7 @@ public class WorkflowBackfillTrigger
         workflowInstance
                 .setWarningType(ObjectUtils.defaultIfNull(backfillTriggerRequest.getWarningType(), WarningType.NONE));
         workflowInstance.setDispatchType(backfillTriggerRequest.getDispatchType());
+        workflowInstance.setDataRate(backfillTriggerRequest.getDataRate());
         workflowInstance.setWarningGroupId(backfillTriggerRequest.getWarningGroupId());
         workflowInstance.setExecutorId(backfillTriggerRequest.getUserId());
         workflowInstance.setExecutorName(getExecutorUser(backfillTriggerRequest.getUserId()).getUserName());

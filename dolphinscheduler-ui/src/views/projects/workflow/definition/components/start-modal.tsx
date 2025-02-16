@@ -113,6 +113,37 @@ export default defineComponent({
       }
     ]
 
+    const dataRateList = () => [
+      {
+        value: 1,
+        label: 1
+      },
+      {
+        value: 2,
+        label: 2
+      },
+      {
+        value: 3,
+        label: 3
+      },
+      {
+        value: 4,
+        label: 4
+      },
+      {
+        value: 5,
+        label: 5
+      },
+      {
+        value: 10,
+        label: 10
+      },
+      {
+        value: 20,
+        label: 20
+      }
+    ]
+
     const generalDispatchList = () => [
       {
         value: 'RANDOM',
@@ -351,6 +382,7 @@ export default defineComponent({
       hideModal,
       handleStart,
       generalWarningTypeListOptions,
+      dataRateList,
       generalDispatchList,
       generalPriorityList,
       renderLabel,
@@ -424,6 +456,12 @@ export default defineComponent({
             <NSelect
               options={this.generalDispatchList()}
               v-model:value={this.startForm.dispatchType}
+            />
+          </NFormItem>
+          <NFormItem label={'数据倍率'} path='dataRate'>
+            <NSelect
+              options={this.dataRateList()}
+              v-model:value={this.startForm.dataRate}
             />
           </NFormItem>
           <NFormItem

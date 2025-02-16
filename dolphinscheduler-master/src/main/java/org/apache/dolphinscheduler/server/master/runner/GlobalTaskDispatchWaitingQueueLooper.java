@@ -44,6 +44,8 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
 
     private final long intervalTime = 100; // 间隔时间100ms
 
+    private final int taskLimit = 16;
+
     private long lastUpdateTime = System.currentTimeMillis(); // 上次更新时间
 
     private Queue<ITaskExecutionRunnable> taskDispatchAblePool = new LinkedList<>(); // 可调度池
@@ -95,7 +97,7 @@ public class GlobalTaskDispatchWaitingQueueLooper extends BaseDaemonThread imple
             }
 
             // 如果超出间隔时间就对池内的任务进行分发
-            if (currentTime - lastUpdateTime > intervalTime) {
+            if (currentTime - lastUpdateTime > intervalTime || taskDispatchAblePool.size() == taskLimit) {
                 if (!taskDispatchAblePool.isEmpty())
                     doMultiDispatch();
             }

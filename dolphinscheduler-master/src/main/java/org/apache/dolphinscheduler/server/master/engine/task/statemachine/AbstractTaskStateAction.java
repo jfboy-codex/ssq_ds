@@ -47,6 +47,7 @@ import org.apache.dolphinscheduler.server.master.engine.workflow.runnable.IWorkf
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
@@ -228,12 +229,18 @@ public abstract class AbstractTaskStateAction implements ITaskStateAction {
             long completionTime = time + duration;
             taskInstance.setExeTime(DateUtils.format2DurationMS(duration));
             taskInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime));
-            float ru = (float) duration / completionTime * 100;
+            float ru = 0;
+            if (completionTime != 0) {
+                ru = (float) duration / completionTime * 100;
+            }
             String resourceUtilization = String.format("%.2f", ru) + "%";
             taskInstance.setResourceUtilization(resourceUtilization);
         }
         taskInstance.setVarPool(taskSuccessEvent.getVarPool());
         taskInstance.setOutResult(taskSuccessEvent.getOutResult());
+        int dataRate = taskExecutionRunnable.getWorkflowInstance().getDataRate();
+        long dataSize = taskInstance.getOutResult().getBytes(StandardCharsets.UTF_8).length * dataRate * 8L;
+        taskInstance.setOutputDataSize(dataSize + "B");
         taskInstanceDao.updateById(taskInstance);
         log.info("数据库更新任务实例结束时间、运行时间、 参数池成功！");
     }

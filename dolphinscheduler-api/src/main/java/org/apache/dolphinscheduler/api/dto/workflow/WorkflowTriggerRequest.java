@@ -50,6 +50,8 @@ public class WorkflowTriggerRequest {
 
     private String dispatchType;
 
+    private int dataRate;
+
     private Integer warningGroupId;
 
     private Priority workflowInstancePriority;

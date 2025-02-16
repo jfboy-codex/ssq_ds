@@ -66,6 +66,7 @@ public class TriggerWorkflowExecutorDelegate implements IExecutorDelegate<Trigge
                 .taskDependType(triggerWorkflowDTO.getTaskDependType())
                 .warningType(triggerWorkflowDTO.getWarningType())
                 .dispatchType(triggerWorkflowDTO.getDispatchType())
+                .dataRate(triggerWorkflowDTO.getDataRate())
                 .warningGroupId(triggerWorkflowDTO.getWarningGroupId())
                 .workflowInstancePriority(triggerWorkflowDTO.getWorkflowInstancePriority())
                 .workerGroup(triggerWorkflowDTO.getWorkerGroup())

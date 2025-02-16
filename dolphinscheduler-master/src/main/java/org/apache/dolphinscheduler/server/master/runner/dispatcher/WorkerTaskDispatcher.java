@@ -136,6 +136,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         String workerGroup = ITaskExecutionRunnable.getTaskExecutionContext().getWorkerGroup();
         WorkerLoadBalancerType configType = workerLoadBalancer.getType();
         String dispatchType = ITaskExecutionRunnable.getWorkflowInstance().getDispatchType();
+        int dataRate = ITaskExecutionRunnable.getWorkflowInstance().getDataRate();
         TaskInstance taskInstance = ITaskExecutionRunnable.getTaskInstance();
 
         if ((configType == WorkerLoadBalancerType.FREEDOM && Objects.equals(dispatchType, "ON_LINE_TASK_SCHEDULE"))
@@ -149,7 +150,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             // 获取信息
             long dispatchStartTime = new Date().getTime();
             ITaskExecutionRunnable.setBandwidthList(processService.findDataCenterBandwidth()); // 获取节点带宽信息
-            ITaskExecutionRunnable.setTaskNeedHostData(getHostData(ITaskExecutionRunnable)); // 获取任务数据信息
+            ITaskExecutionRunnable.setTaskNeedHostData(getHostData(ITaskExecutionRunnable, dataRate)); // 获取任务数据信息
             long exeTime = predictExeTime(ITaskExecutionRunnable);
             taskInstance.setDispatchCode(dispatchStartTime);
             taskInstance.setExeTime(DateUtils.format2DurationMS(exeTime)); // 预测任务执行时间（选取前要用）
@@ -211,6 +212,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
 
         // TODO 任务组里面的分发策略以及工作组应该保持一致，这里暂选一个任务为代表
         String dispatchType = taskExecutionRunnableList.get(0).getWorkflowInstance().getDispatchType();
+        int dataRate = taskExecutionRunnableList.get(0).getWorkflowInstance().getDataRate();
         String workerGroup = taskExecutionRunnableList.get(0).getTaskExecutionContext().getWorkerGroup();
         tasksExecutionRunnable.setDispatchType(dispatchType);
         tasksExecutionRunnable.setWorkerGroup(workerGroup);
@@ -256,7 +258,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         tasksExecutionRunnable.setHostUsableTimeTable(hostUsableTimeTable);
 
         // 获取任务所需数据信息
-        Table<Long, Long, IntermediateData> tasksNeedTasksData = getTasksNeedTasksData(taskExecutionRunnableList);
+        Table<Long, Long, IntermediateData> tasksNeedTasksData = getTasksNeedTasksData(taskExecutionRunnableList, dataRate);
         BiMap<Integer, Long> dataBiMap = HashBiMap.create();
         Map<Long, HostThread> dataHostThreadMap = new HashMap<>();
         int dataIndex = 0;
@@ -281,7 +283,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         return tasksExecutionRunnable;
     }
 
-    public Table<Long, Long, IntermediateData> getTasksNeedTasksData(@NonNull List<ITaskExecutionRunnable> taskExecutionRunnableList) {
+    public Table<Long, Long, IntermediateData> getTasksNeedTasksData(@NonNull List<ITaskExecutionRunnable> taskExecutionRunnableList, int dataRate) {
         Table<Long, Long, IntermediateData> taskDataTable = HashBasedTable.create();
         for (ITaskExecutionRunnable taskExecutionRunnable : taskExecutionRunnableList) {
             TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
@@ -289,7 +291,8 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
             for (TaskInstance leftTaskInstance : leftTaskInstanceList) {
                 long leftTaskCode = leftTaskInstance.getTaskCode();
                 String host = leftTaskInstance.getDataHost();
-                long dataSize = leftTaskInstance.getOutResult().getBytes(StandardCharsets.UTF_8).length * 8L;
+                String dataStr = leftTaskInstance.getOutputDataSize();
+                long dataSize = Long.parseLong(dataStr.substring(0, dataStr.length() - 1));
                 IntermediateData data = new IntermediateData(leftTaskInstance, host, dataSize);
                 taskDataTable.put(taskInstance.getTaskCode(), leftTaskCode, data);
             }
@@ -475,7 +478,7 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
     }
 
     @SneakyThrows // 简化异常处理
-    public Map<Host, Long> getHostData(@NonNull ITaskExecutionRunnable ITaskExecutionRunnable) {
+    public Map<Host, Long> getHostData(@NonNull ITaskExecutionRunnable ITaskExecutionRunnable, int dataRate) {
         // 获取前置节点任务实例
         List<TaskInstance> leftTaskInstanceList = getLeftTaskInstanceList(ITaskExecutionRunnable);
 
@@ -483,8 +486,9 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         Map<Host, Long> hostDataMap = new HashMap<>();
         for (TaskInstance taskInstance : leftTaskInstanceList) {
             Host host = Host.of(taskInstance.getHost());
+            String dataStr = taskInstance.getOutputDataSize();
             // 求出数据大小，单位比特
-            long dataSize = taskInstance.getOutResult().getBytes(StandardCharsets.UTF_8).length * 8L;
+            long dataSize = Long.parseLong(dataStr.substring(0, dataStr.length() - 1));
             if (hostDataMap.get(host) != null) {
                 dataSize += hostDataMap.get(host);
             }
