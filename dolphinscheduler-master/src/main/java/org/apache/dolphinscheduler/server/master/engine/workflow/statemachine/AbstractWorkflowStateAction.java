@@ -237,7 +237,10 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         for (TaskInstance taskInstance : currentTaskInstanceList) {
             long taskCode = taskInstance.getTaskCode();
             taskInstanceMap.put(taskCode, taskInstance);
-            taskCompletionTimeMap.put(taskCode, DateUtils.duration2MS(taskInstance.getCompletionTime()));
+            long waitTime = DateUtils.duration2MS(taskInstance.getWaitTime());
+            long transferTime = DateUtils.duration2MS(taskInstance.getTransferTime());
+            long time = Math.max(waitTime, transferTime);
+            taskCompletionTimeMap.put(taskCode, time);
             dp.put(taskCode, DateUtils.duration2MS(taskInstance.getCompletionTime()));
             paths.put(taskCode, new LinkedList<>());
             paths.get(taskCode).add(taskCode);
@@ -321,7 +324,9 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         final WorkflowInstance workflowInstance = workflowExecutionRunnable.getWorkflowInstance();
         workflowInstance.setEndTime(new Date());
         workflowInstance.setState(workflowExecutionStatus);
-        workflowInstance.setCompletionTime(DateUtils.format2DurationMS(getCompletionTime(workflowExecutionRunnable)));
+        long duration = workflowInstance.getEndTime().getTime() - workflowInstance.getStartTime().getTime();
+        long completionTime = duration + getCompletionTime(workflowExecutionRunnable);
+        workflowInstance.setCompletionTime(DateUtils.format2DurationMS(completionTime));
         workflowInstance.setTransferDataSize(getTransferDataSize(workflowExecutionRunnable));
         workflowInstance.setResourceUtilization(getResourceUtilization(workflowExecutionRunnable));
         transformWorkflowInstanceState(workflowExecutionRunnable, workflowExecutionStatus);

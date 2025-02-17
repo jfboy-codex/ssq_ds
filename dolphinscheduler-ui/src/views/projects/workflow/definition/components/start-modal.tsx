@@ -119,18 +119,6 @@ export default defineComponent({
         label: 1
       },
       {
-        value: 2,
-        label: 2
-      },
-      {
-        value: 3,
-        label: 3
-      },
-      {
-        value: 4,
-        label: 4
-      },
-      {
         value: 5,
         label: 5
       },
@@ -139,8 +127,20 @@ export default defineComponent({
         label: 10
       },
       {
-        value: 20,
-        label: 20
+        value: 50,
+        label: 50
+      },
+      {
+        value: 100,
+        label: 100
+      },
+      {
+        value: 200,
+        label: 200
+      },
+      {
+        value: 500,
+        label: 500
       }
     ]
 
@@ -154,28 +154,32 @@ export default defineComponent({
         label: 'ROUND_ROBIN'
       },
       {
-        value: 'FIXED_WEIGHTED_ROUND_ROBIN',
-        label: 'FIXED_WEIGHTED_ROUND_ROBIN'
-      },
-      {
-        value: 'DYNAMIC_WEIGHTED_ROUND_ROBIN',
-        label: 'DYNAMIC_WEIGHTED_ROUND_ROBIN'
-      },
-      {
-        value: 'WEIGHTED_RANDOM',
-        label: 'WEIGHTED_RANDOM'
-      },
-      {
-        value: 'MAX_MIN_FAIRNESS',
-        label: 'MAX_MIN_FAIRNESS'
+        value: 'HUNGARY',
+        label: 'HUNGARY'
       },
       {
         value: 'FLUTTER',
         label: 'FLUTTER'
       },
       {
-        value: 'HUNGARY',
-        label: 'HUNGARY'
+        value: 'MAX_MIN_FAIRNESS',
+        label: 'MAX_MIN_FAIRNESS'
+      },
+      {
+        value: 'BINARY_HUNGARY_GREEDY',
+        label: 'BINARY_HUNGARY_GREEDY'
+      },
+      {
+        value: 'WEIGHTED_RANDOM',
+        label: 'WEIGHTED_RANDOM'
+      },
+      {
+        value: 'FIXED_WEIGHTED_ROUND_ROBIN',
+        label: 'FIXED_WEIGHTED_ROUND_ROBIN'
+      },
+      {
+        value: 'DYNAMIC_WEIGHTED_ROUND_ROBIN',
+        label: 'DYNAMIC_WEIGHTED_ROUND_ROBIN'
       },
       {
         value: 'TASK_DATA_SCHEDULE',
@@ -192,10 +196,6 @@ export default defineComponent({
       {
         value: 'BINARY_HUNGARY_BFS',
         label: 'BINARY_HUNGARY_BFS'
-      },
-      {
-        value: 'BINARY_HUNGARY_GREEDY',
-        label: 'BINARY_HUNGARY_GREEDY'
       },
     ]
 

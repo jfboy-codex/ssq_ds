@@ -511,13 +511,21 @@ public class WorkerTaskDispatcher extends BaseTaskDispatcher {
         long transferTime = 0;
         long receiveDataSize = 0;
         Map<Host, Long> hostDataMap = ITaskExecutionRunnable.getTaskNeedHostData();
+        List<Bandwidth> bandwidthList = ITaskExecutionRunnable.getBandwidthList();
+        Table<Host, Host, Double> bandwidthTable = HashBasedTable.create();
+        for (Bandwidth bandwidth : bandwidthList) {
+            bandwidthTable.put(Host.of(bandwidth.getPreHost()), Host.of(bandwidth.getPostHost()),
+                    bandwidth.getBandwidth());
+        }
         for (Map.Entry<Host, Long> entry : hostDataMap.entrySet()) {
-            String preHost = entry.getKey().getAddress();
-            String postHost = optionalHostThread.get().getHost().getAddress();
-            double bandwidth = ITaskExecutionRunnable.getBandwidthList().stream()
-                    .filter(v -> preHost.equals(v.getPreHost()) && postHost.equals(v.getPostHost()))
-                    .map(Bandwidth::getBandwidth)
-                    .findFirst().get();
+            Host preHost = entry.getKey();
+            Host postHost = optionalHostThread.get().getHost();
+            double bandwidth = 10;
+            if (bandwidthTable.get(preHost, postHost) != null) {
+                bandwidth = bandwidthTable.get(preHost, postHost);
+            } else {
+                System.out.println(preHost.getAddress() + "和" + postHost.getAddress() + "之间没有带宽设置！");
+            }
             long dataSize = entry.getValue();
             long localTransferTime = (long) (dataSize * 1000 / bandwidth); // 单位ms
             if (localTransferTime >= transferTime) {

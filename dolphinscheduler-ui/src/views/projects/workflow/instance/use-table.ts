@@ -149,7 +149,7 @@ export function useTable() {
       {
         title: "数据倍率",
         key: 'dataRate',
-        width: 300,
+        width: 120,
         render: (_row: IWorkflowInstance) => _row.dataRate || '-'
       },
       {
