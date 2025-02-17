@@ -143,8 +143,12 @@ public class WorkflowGraphTopologyLogicalVisitor {
             }
             for (String successor : successors) {
                 inDegreeMap.put(successor, inDegreeMap.get(successor) - 1);
+                // 不加入重复的
+                if (!bootstrapTaskCodes.contains(successor)) {
+                    bootstrapTaskCodes.add(successor);
+                }
             }
-            bootstrapTaskCodes.addAll(successors);
+            // bootstrapTaskCodes.addAll(successors); //源代码有bug，可能会不断加入重复的
         }
     }
 
