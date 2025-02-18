@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-import { reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import { useAsyncState } from '@vueuse/core'
 import { listMonitorServerNode } from '@/service/modules/monitor'
 import type { MasterNode } from '@/service/modules/monitor/types'
 
 export function useMaster() {
   const variables = reactive({
-    data: []
+    data: [],
+    selfShowRef: ref(false),
   })
   const getTableMaster = () => {
     const { state } = useAsyncState(

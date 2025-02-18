@@ -16,7 +16,7 @@
  */
 
 import { axios } from '@/service/service'
-import type { ServerNodeType } from './types'
+import type { ServerNodeType, BandwidthRes } from './types'
 
 export function queryDatabaseState(): any {
   return axios({
@@ -36,6 +36,22 @@ export function listWorker(): any {
   return axios({
     url: '/monitor/workers',
     method: 'get'
+  })
+}
+
+export function setBandwidth(data: BandwidthRes): any {
+  return axios({
+    url: `/monitor/bandwidth`,
+    method: 'post',
+    data
+  })
+}
+
+export function setHostThread(data: BandwidthRes): any {
+  return axios({
+    url: `/monitor/hostThread`,
+    method: 'post',
+    data
   })
 }
 

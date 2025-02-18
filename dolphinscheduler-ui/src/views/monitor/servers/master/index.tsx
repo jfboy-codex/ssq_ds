@@ -16,7 +16,7 @@
  */
 
 import { defineComponent, onMounted, ref, toRefs } from 'vue'
-import { NGrid, NGi, NCard, NNumberAnimation, NSpace, NTag } from 'naive-ui'
+import { NGrid, NGi, NCard, NNumberAnimation, NSpace, NTag, NButton } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import { useMaster } from './use-master'
 import styles from './index.module.scss'
@@ -27,6 +27,7 @@ import MasterModal from './master-modal'
 import type { Ref } from 'vue'
 import type { RowData } from 'naive-ui/es/data-table/src/interface'
 import type { MasterNode } from '@/service/modules/monitor/types'
+import { setBandwidth, setHostThread } from '@/service/modules/monitor'
 import { capitalize } from 'lodash'
 
 const master = defineComponent({
@@ -42,6 +43,34 @@ const master = defineComponent({
       showModalRef.value = true
     }
 
+    const setAllBandwidth = async (host: string) => {
+      try {
+        const data = {
+          host
+        }
+        setBandwidth(data).then((res: any) => {
+          // console.log('设置带宽成功')
+        })
+        window.$message.success('设置带宽成功')
+      } catch (err) {
+        window.$message.error('设置带宽失败')
+      }
+    }
+
+    const setAllHostThread = async (host: string) => {
+      try {
+        const data = {
+          host
+        }
+        setHostThread(data).then((res: any) => {
+          // console.log('设置线程信息成功')
+        })
+        window.$message.success('设置线程信息成功')
+      } catch (err) {
+        window.$message.error('设置线程信息失败')
+      }
+    }
+
     const onConfirmModal = () => {
       showModalRef.value = false
     }
@@ -55,6 +84,8 @@ const master = defineComponent({
       ...toRefs(variables),
       clickDetails,
       onConfirmModal,
+      setAllBandwidth,
+      setAllHostThread,
       showModalRef,
       zkDirectoryRef
     }
@@ -108,6 +139,22 @@ const master = defineComponent({
                         {t('monitor.master.directory_detail')}
                       </span>
                     </NSpace>
+                    <NButton
+                      strong
+                      secondary
+                      size='small'
+                      onClick={() => (this.setAllBandwidth(item.host))}
+                    >
+                      {'设置带宽信息'}
+                    </NButton>
+                    <NButton
+                      strong
+                      secondary
+                      size='small'
+                      onClick={() => (this.setAllHostThread(item.host))}
+                    >
+                      {'设置线程信息'}
+                    </NButton>
                     <NSpace>
                       <span>{`${t('monitor.master.create_time')}: ${
                         item ? item.createTime : ' - '

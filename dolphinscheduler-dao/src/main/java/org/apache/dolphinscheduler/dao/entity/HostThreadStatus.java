@@ -41,4 +41,14 @@ public class HostThreadStatus implements Serializable {
 
     private Long usableTimeStamp;
 
+    public HostThreadStatus() {
+    }
+
+    public HostThreadStatus(String host, Integer threadId, Date usableTime, Long usableTimeStamp) {
+        this.host = host;
+        this.threadId = threadId;
+        this.usableTime = usableTime;
+        this.usableTimeStamp = usableTimeStamp;
+    }
+
 }

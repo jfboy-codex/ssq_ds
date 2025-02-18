@@ -25,6 +25,10 @@ interface DatabaseRes {
   date: string
 }
 
+interface BandwidthRes {
+  host: string
+}
+
 type ServerNodeType = 'MASTER' | 'WORKER' | 'ALERT_SERVER'
 
 interface ServerNode {
@@ -53,6 +57,7 @@ export {
   DatabaseRes,
   MasterNode,
   WorkerNode,
+  BandwidthRes,
   ServerNodeType,
   ServerNode,
   AlertNode

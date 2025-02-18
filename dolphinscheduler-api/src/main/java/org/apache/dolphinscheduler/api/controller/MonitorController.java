@@ -20,6 +20,7 @@ package org.apache.dolphinscheduler.api.controller;
 import static org.apache.dolphinscheduler.api.enums.Status.LIST_MASTERS_ERROR;
 import static org.apache.dolphinscheduler.api.enums.Status.QUERY_DATABASE_STATE_ERROR;
 
+import org.apache.dolphinscheduler.api.enums.Status;
 import org.apache.dolphinscheduler.api.exceptions.ApiException;
 import org.apache.dolphinscheduler.api.service.MonitorService;
 import org.apache.dolphinscheduler.api.utils.Result;
@@ -35,8 +36,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -82,6 +85,28 @@ public class MonitorController extends BaseController {
     public Result<List<DatabaseMetrics>> queryDatabaseState(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser) {
         List<DatabaseMetrics> databaseMetrics = monitorService.queryDatabaseState(loginUser);
         return Result.success(databaseMetrics);
+    }
+
+    @Operation(summary = "setBandwidth", description = "SET_BANDWIDTH")
+    @PostMapping(value = "/bandwidth")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(QUERY_DATABASE_STATE_ERROR)
+    public Result setBandwidth(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+                               @RequestParam(value = "host") String host) {
+        boolean flag = monitorService.setBandwidth(loginUser, host);
+        if (flag) return Result.success();
+        else return Result.error(Status.INTERNAL_SERVER_ERROR_ARGS);
+    }
+
+    @Operation(summary = "setHostThread", description = "SET_HOST_THREAD")
+    @PostMapping(value = "/hostThread")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(QUERY_DATABASE_STATE_ERROR)
+    public Result setHostThread(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+                               @RequestParam(value = "host") String host) {
+        boolean flag = monitorService.setHostThread(loginUser, host);
+        if (flag) return Result.success();
+        else return Result.error(Status.INTERNAL_SERVER_ERROR_ARGS);
     }
 
 }

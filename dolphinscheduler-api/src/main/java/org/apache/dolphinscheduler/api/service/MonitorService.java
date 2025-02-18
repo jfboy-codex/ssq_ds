@@ -44,4 +44,8 @@ public interface MonitorService {
      * @return server information list
      */
     List<Server> listServer(RegistryNodeType nodeType);
+
+    boolean setBandwidth(User loginUser, String host);
+
+    boolean setHostThread(User loginUser, String host);
 }

@@ -38,4 +38,13 @@ public class Bandwidth implements Serializable {
 
     private Double bandwidth;
 
+    public Bandwidth() {
+    }
+
+    public Bandwidth(String preHost, String postHost, Double bandwidth) {
+        this.preHost = preHost;
+        this.postHost = postHost;
+        this.bandwidth = bandwidth;
+    }
+
 }
