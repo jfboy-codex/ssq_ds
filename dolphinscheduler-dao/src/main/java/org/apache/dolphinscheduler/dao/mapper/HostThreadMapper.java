@@ -17,11 +17,11 @@
 
 package org.apache.dolphinscheduler.dao.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.dolphinscheduler.dao.entity.Bandwidth;
 import org.apache.dolphinscheduler.dao.entity.HostThreadStatus;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * cluster mapper interface

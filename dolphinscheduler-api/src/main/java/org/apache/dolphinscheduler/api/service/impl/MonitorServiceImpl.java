@@ -17,8 +17,6 @@
 
 package org.apache.dolphinscheduler.api.service.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import org.apache.dolphinscheduler.api.service.MonitorService;
 import org.apache.dolphinscheduler.common.model.Server;
 import org.apache.dolphinscheduler.dao.entity.Bandwidth;
@@ -40,7 +38,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 
 /**
  * monitor service impl
@@ -102,9 +102,9 @@ public class MonitorServiceImpl extends BaseServiceImpl implements MonitorServic
         bandwidthTable.put(3, 2, 80000.0);
         bandwidthTable.put(3, 3, 100000000.0);
 
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             String preHost = host + ":" + ports[i];
-            for (int j=0; j<4; j++) {
+            for (int j = 0; j < 4; j++) {
                 String postHost = host + ":" + ports[j];
                 bandwidths.add(new Bandwidth(preHost, postHost, bandwidthTable.get(i, j)));
             }
@@ -123,9 +123,9 @@ public class MonitorServiceImpl extends BaseServiceImpl implements MonitorServic
         Date now = new Date();
         long time = now.getTime();
 
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             String hostPort = host + ":" + ports[i];
-            for (int j=0; j<4; j++) {
+            for (int j = 0; j < 4; j++) {
                 hostThreads.add(new HostThreadStatus(hostPort, j, now, time));
             }
         }

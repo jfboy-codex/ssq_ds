@@ -94,8 +94,10 @@ public class MonitorController extends BaseController {
     public Result setBandwidth(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
                                @RequestParam(value = "host") String host) {
         boolean flag = monitorService.setBandwidth(loginUser, host);
-        if (flag) return Result.success();
-        else return Result.error(Status.INTERNAL_SERVER_ERROR_ARGS);
+        if (flag)
+            return Result.success();
+        else
+            return Result.error(Status.INTERNAL_SERVER_ERROR_ARGS);
     }
 
     @Operation(summary = "setHostThread", description = "SET_HOST_THREAD")
@@ -103,10 +105,12 @@ public class MonitorController extends BaseController {
     @ResponseStatus(HttpStatus.OK)
     @ApiException(QUERY_DATABASE_STATE_ERROR)
     public Result setHostThread(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
-                               @RequestParam(value = "host") String host) {
+                                @RequestParam(value = "host") String host) {
         boolean flag = monitorService.setHostThread(loginUser, host);
-        if (flag) return Result.success();
-        else return Result.error(Status.INTERNAL_SERVER_ERROR_ARGS);
+        if (flag)
+            return Result.success();
+        else
+            return Result.error(Status.INTERNAL_SERVER_ERROR_ARGS);
     }
 
 }
