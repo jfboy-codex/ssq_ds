@@ -133,4 +133,12 @@ public class MonitorServiceImpl extends BaseServiceImpl implements MonitorServic
         int rows = hostThreadMapper.insertHostThreads(hostThreads);
         return rows > 0;
     }
+
+    @Override
+    public boolean updateUsableTime(User loginUser) {
+        Date now = new Date();
+        long time = now.getTime();
+        int rows = hostThreadMapper.updateUsableTime(now, time);
+        return rows > 0;
+    }
 }

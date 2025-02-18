@@ -55,6 +55,13 @@ export function setHostThread(data: BandwidthRes): any {
   })
 }
 
+export function updateUsableTime(): any {
+  return axios({
+    url: `/monitor/update/usableTime`,
+    method: 'post'
+  })
+}
+
 export function listMonitorServerNode(nodeType: ServerNodeType): any {
   return axios({
     url: `/monitor/${nodeType}`,

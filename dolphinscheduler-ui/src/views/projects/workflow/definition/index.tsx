@@ -48,6 +48,7 @@ import type { Router } from 'vue-router'
 import Search from '@/components/input-search'
 import DependenciesModal from '@/views/projects/components/dependencies/dependencies-modal'
 import totalCount from '@/utils/tableTotalCount'
+import { updateUsableTime } from '@/service/modules/monitor'
 
 export default defineComponent({
   name: 'WorkflowDefinitionList',
@@ -72,6 +73,17 @@ export default defineComponent({
         pageNo: variables.page,
         searchVal: variables.searchVal
       })
+    }
+
+    const updateAllUsableTime = async () => {
+      try {
+        updateUsableTime().then((res: any) => {
+          // console.log('重置线程信息成功')
+        })
+        window.$message.success('重置线程信息成功')
+      } catch (err) {
+        window.$message.error('重置线程信息失败')
+      }
     }
 
     const handleUpdateList = () => {
@@ -138,6 +150,7 @@ export default defineComponent({
       onClearSearch,
       handleUpdateList,
       createDefinition,
+      updateAllUsableTime,
       createDefinitionDynamic,
       handleChangePageSize,
       batchDeleteWorkflow,
@@ -191,6 +204,14 @@ export default defineComponent({
                 onClick={() => (this.selfShowRef = true)}
               >
                 {'自定义工作流'}
+              </NButton>
+              <NButton
+                strong
+                secondary
+                size='small'
+                onClick={() => (this.updateAllUsableTime())}
+              >
+                {'重置线程可用时间'}
               </NButton>
             </NSpace>
             <NSpace>

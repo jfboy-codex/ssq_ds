@@ -48,4 +48,6 @@ public interface MonitorService {
     boolean setBandwidth(User loginUser, String host);
 
     boolean setHostThread(User loginUser, String host);
+
+    boolean updateUsableTime(User loginUser);
 }

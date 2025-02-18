@@ -113,4 +113,16 @@ public class MonitorController extends BaseController {
             return Result.error(Status.INTERNAL_SERVER_ERROR_ARGS);
     }
 
+    @Operation(summary = "updateUsableTime", description = "UPDATE_USABLE_TIME")
+    @PostMapping(value = "/update/usableTime")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(QUERY_DATABASE_STATE_ERROR)
+    public Result updateUsableTime(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser) {
+        boolean flag = monitorService.updateUsableTime(loginUser);
+        if (flag)
+            return Result.success();
+        else
+            return Result.error(Status.INTERNAL_SERVER_ERROR_ARGS);
+    }
+
 }

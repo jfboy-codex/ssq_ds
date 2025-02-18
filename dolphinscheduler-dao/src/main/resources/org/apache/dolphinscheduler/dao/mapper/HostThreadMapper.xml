@@ -33,4 +33,10 @@
     <delete id="deleteAllHostThreads">
         DELETE FROM ssq_host_thread
     </delete>
+    <!-- 更新所有记录的 usableTime 字段为 123 -->
+    <update id="updateUsableTime">
+        UPDATE ssq_host_thread
+        SET usable_time = #{usableTime},
+        usable_time_stamp = #{usableTimeStamp}
+    </update>
 </mapper>

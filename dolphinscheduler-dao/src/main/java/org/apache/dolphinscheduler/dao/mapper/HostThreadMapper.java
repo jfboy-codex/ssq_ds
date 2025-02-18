@@ -19,6 +19,9 @@ package org.apache.dolphinscheduler.dao.mapper;
 
 import org.apache.dolphinscheduler.dao.entity.HostThreadStatus;
 
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -31,4 +34,6 @@ public interface HostThreadMapper extends BaseMapper<HostThreadStatus> {
     int insertHostThreads(List<HostThreadStatus> hostThreads);
 
     int deleteAllHostThreads();
+
+    int updateUsableTime(@Param("usableTime") Date usableTime, @Param("usableTimeStamp") long newUsableTimeStamp);
 }
