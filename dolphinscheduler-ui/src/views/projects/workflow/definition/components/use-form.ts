@@ -97,7 +97,7 @@ export const useForm = () => {
       dataDateType: 1,
       failureStrategy: 'END',
       dispatchType: 'RANDOM',
-      dataRate: 100,
+      dataRate: 20,
       warningType: 'NONE',
       warningGroupId: null,
       execType: 'START_PROCESS',

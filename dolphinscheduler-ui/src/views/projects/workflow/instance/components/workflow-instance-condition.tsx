@@ -168,6 +168,22 @@ export default defineComponent({
         label: 'ROUND_ROBIN'
       },
       {
+        value: 'HUNGARY',
+        label: 'HUNGARY'
+      },
+      {
+        value: 'FLUTTER',
+        label: 'FLUTTER'
+      },
+      {
+        value: 'MAX_MIN_FAIRNESS',
+        label: 'MAX_MIN_FAIRNESS'
+      },
+      {
+        value: 'BINARY_HUNGARY_GREEDY',
+        label: 'BINARY_HUNGARY_GREEDY'
+      },
+      {
         value: 'FIXED_WEIGHTED_ROUND_ROBIN',
         label: 'FIXED_WEIGHTED_ROUND_ROBIN'
       },
@@ -178,18 +194,6 @@ export default defineComponent({
       {
         value: 'WEIGHTED_RANDOM',
         label: 'WEIGHTED_RANDOM'
-      },
-      {
-        value: 'MAX_MIN_FAIRNESS',
-        label: 'MAX_MIN_FAIRNESS'
-      },
-      {
-        value: 'FLUTTER',
-        label: 'FLUTTER'
-      },
-      {
-        value: 'HUNGARY',
-        label: 'HUNGARY'
       },
       {
         value: 'TASK_DATA_SCHEDULE',
@@ -206,10 +210,6 @@ export default defineComponent({
       {
         value: 'BINARY_HUNGARY_BFS',
         label: 'BINARY_HUNGARY_BFS'
-      },
-      {
-        value: 'BINARY_HUNGARY_GREEDY',
-        label: 'BINARY_HUNGARY_GREEDY'
       },
     ]
 

@@ -120,12 +120,13 @@ public class MonitorServiceImpl extends BaseServiceImpl implements MonitorServic
 
         List<HostThreadStatus> hostThreads = new ArrayList<>();
         String[] ports = {"1234", "1244", "1254", "1264"};
+        int[] slotNum = {4, 4, 4, 4};
         Date now = new Date();
         long time = now.getTime();
 
         for (int i = 0; i < 4; i++) {
             String hostPort = host + ":" + ports[i];
-            for (int j = 0; j < 4; j++) {
+            for (int j = 0; j < slotNum[i]; j++) {
                 hostThreads.add(new HostThreadStatus(hostPort, j, now, time));
             }
         }

@@ -158,10 +158,8 @@ public abstract class AbstractWorkflowStateAction implements IWorkflowStateActio
         for (TaskInstance taskInstance : currentTaskInstanceList) {
             String taskRU = taskInstance.getResourceUtilization();
             float num = Float.parseFloat(taskRU.substring(0, taskRU.length() - 1));
-            if (num != 0) {
-                ru += num;
-                len += 1;
-            }
+            ru += num;
+            len += 1;
         }
         ru /= len;
         return String.format("%.2f", ru) + "%";

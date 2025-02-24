@@ -62,6 +62,10 @@ export default defineComponent({
       {
         label: 'LIGO',
         value: 'LIGO',
+      },
+      {
+        label: 'AI',
+        value: 'AI',
       }
     ]
 

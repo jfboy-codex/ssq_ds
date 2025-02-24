@@ -49,11 +49,11 @@ const master = defineComponent({
           host
         }
         setBandwidth(data).then((res: any) => {
-          // console.log('设置带宽成功')
+          // console.log('设置带宽信息成功')
         })
-        window.$message.success('设置带宽成功')
+        window.$message.success('设置带宽信息成功')
       } catch (err) {
-        window.$message.error('设置带宽失败')
+        window.$message.error('设置带宽信息失败')
       }
     }
 

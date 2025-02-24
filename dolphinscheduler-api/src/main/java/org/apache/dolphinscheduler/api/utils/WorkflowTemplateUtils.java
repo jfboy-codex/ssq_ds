@@ -82,6 +82,9 @@ public class WorkflowTemplateUtils {
                 // else
                 // topNum = (num - 4) / 4 + 1;
                 // return topNum * 4 + 4;
+            case "AI":
+                int t = (int) Math.sqrt(num);
+                return t * t;
             default:
                 return num;
         }
@@ -95,9 +98,41 @@ public class WorkflowTemplateUtils {
                 return getManyMontageTaskRelations(projectCode, num);
             case "CyberShake":
                 return getManyCyberShakeTaskRelations(projectCode, num);
+            case "AI":
+                return getManyAITaskRelations(projectCode, num);
             default:
                 return getNoEdgeTaskRelations(projectCode, num);
         }
+    }
+
+    private static List<WorkflowTaskRelation> getManyAITaskRelations(long projectCode, int num) {
+        List<WorkflowTaskRelation> workflowTaskRelationList = new ArrayList<>();
+        int t = (int) Math.sqrt(num);
+        int id = 1;
+        for (int i = 1; i <= num; i++) {
+            WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                    projectCode, 0, 0, 0, i, 0,
+                    ConditionType.NONE, "{}");
+            workflowTaskRelation.setId(id);
+            workflowTaskRelationList.add(workflowTaskRelation);
+            id++;
+        }
+        for (int i = 0; i < t - 1; i++) {
+            for (int j = 1; j <= t; j++) {
+                int task = i * t + j;
+                int nextI = i + 1;
+                for (int k = 1; k <= t; k++) {
+                    int nextTask = nextI * t + k;
+                    WorkflowTaskRelation workflowTaskRelation = new WorkflowTaskRelation("", 1,
+                            projectCode, 0, task, 0, nextTask, 0,
+                            ConditionType.NONE, "{}");
+                    workflowTaskRelation.setId(id);
+                    workflowTaskRelationList.add(workflowTaskRelation);
+                    id++;
+                }
+            }
+        }
+        return workflowTaskRelationList;
     }
 
     private static List<WorkflowTaskRelation> getManyLIGOTaskRelations(long projectCode, int num) {
